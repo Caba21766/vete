@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Facturas</title>
+</head>
+<body>
+    <h1>Lista de Facturas</h1>
+    <a href="/facturas/crear/">Crear Nueva Factura</a>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Número de Factura</th>
+            <th>Cliente</th>
+            <th>Total</th>
+            <th>Método de Pago</th>
+            <th>Fecha</th>
+        </tr>
+        {% for factura in facturas %}
+        <tr>
+            <td>{{ factura.id }}</td>
+            <td>{{ factura.numero_factura }}</td>
+            <td>{{ factura.nombre_cliente }} {{ factura.apellido_cliente }}</td>
+            <td>${{ factura.total }}</td>
+            <td>{{ factura.metodo_pago }}</td>
+            <td>{{ factura.fecha }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

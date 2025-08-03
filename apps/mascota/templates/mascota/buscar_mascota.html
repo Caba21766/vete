@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block contenido %}
+
+{% if user.is_staff %}
+<div class="container mt-4">
+    <h2 class="text-center">Numero DNI Nº</h2>
+
+    <form action="{% url 'mascota:buscar_mascota' %}" method="get" class="text-center my-3">
+        <input type="text" name="dni" placeholder="DNI del Titular" value="{{ dni }}" class="form-control d-inline-block w-50">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+
+    {% if mascotas %}
+    <div class="mt-4">
+        <h5 class="text-center">Mascotas encontradas para el DNI: <strong>{{ dni }}</strong></h5>
+        <ul class="list-group">
+            {% for mascota in mascotas %}
+            <li class="list-group-item text-center">ID: {{ mascota.id }} - Nombre: {{ mascota.nombre }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% elif dni %}
+    <p class="text-danger text-center">No se encontraron mascotas para este DNI.</p>
+    {% endif %}
+</div>
+{% else %}
+<p class="text-danger text-center">No tienes permisos para acceder a esta sección.</p>
+{% endif %}
+
+{% endblock %}

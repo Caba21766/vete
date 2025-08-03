@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<div class="container my-5">
+    <div class="card shadow-lg border-0 rounded">
+        <div class="card-header bg-danger text-white text-center">
+            <h5 class="fw-bold mb-0">Confirmar Eliminación</h5>
+        </div>
+        <div class="card-body text-center">
+            <p>¿Estás seguro de que deseas eliminar este informe?</p>
+            <p><strong>{{ informe.informe }}</strong></p>
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+                <a href="{% url 'mascota:detalle_mascota' mascota.id %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

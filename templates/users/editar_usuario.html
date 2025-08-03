@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+
+{% block contenido %}
+<style>
+    .form-group p {
+        margin: 3px 0; /* Reduce el espacio vertical */
+        line-height: 1.2; /* Ajusta el interlineado */
+    }
+</style>
+<div class="form-container" style="max-width: 400px; margin: auto; padding: 5px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+    <h2 style="font-size: 1.5rem; text-align: center;">Modificar Perfil</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn-submit" style="width: 30%; padding: 10px; font-size: 1rem; color: #fff; background-color: #4CAF50; border: none; border-radius: 4px;">Guardar</button>
+    </form>
+</div>
+{% endblock %}
+
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

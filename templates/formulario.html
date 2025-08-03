@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+
+{% block contenido %}
+<style>
+    .btn-enviar {
+        background-color: transparent; /* Fondo transparente */
+        border: 2px solid transparent; /* Sin borde visible */
+        color: #000; /* Cambia el color del texto */
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 10px 15px;
+        border-radius: 5px; /* Bordes redondeados */
+    }
+
+    .btn-enviar:hover {
+        background-color: rgba(0, 0, 0, 0.1); /* Fondo ligeramente oscuro al pasar el mouse */
+    }
+</style>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<div class="contenedor-formulario">
+    <div class="formulario-contacto">
+        <h2> Enviar mensaje al WhatsApp</h2>
+        <form id="whatsappForm" onsubmit="sendWhatsAppMessage(event)">
+            {% csrf_token %}
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required>
+            
+            <label for="consulta">Consulta:</label>
+            <textarea id="consulta" name="consulta" rows="4" placeholder="Escribe tu consulta aquí" required></textarea>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn-enviar" style="border: 2px solid transparent; background-color: transparent; transition: all 0.3s ease;" 
+                        onmouseover="this.style.border='2px solid #007bff'; this.style.backgroundColor='transparent'" 
+                        onmouseout="this.style.border='2px solid transparent'; this.style.backgroundColor='transparent'">
+                    <img src="{% static 'img/what.png' %}" alt="WhatsApp" style="width: 40px; height: 40px; vertical-align: middle; margin-right: 5px;">
+                    Enviar
+                </button>
+            </div>
+            
+            
+        </form>
+    </div>
+</div>
+
+<script>
+    function sendWhatsAppMessage(event) {
+        event.preventDefault(); // Evita que se envíe el formulario de forma predeterminada
+
+        // Obtén los valores del formulario
+        const nombre = document.getElementById('nombre').value;
+        const consulta = document.getElementById('consulta').value;
+
+        // Número de WhatsApp fijo
+        const numeroWhatsApp = "5493644358404";
+
+        // Construye el mensaje para WhatsApp
+        const mensaje = `Hola, soy ${nombre}. ${consulta}`;
+
+        // Redirige directamente al enlace de WhatsApp
+        const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+        window.location.href = url; // Redirige automáticamente al enlace
+    }
+</script>
+{% endblock %}
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

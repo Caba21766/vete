@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container">
+    <h2 class="text-center my-4">Editar Información</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <div class="text-center">
+                    <h4>Imágenes actuales:</h4>
+                    {% if mascota.imagen %}
+                        <img src="{{ mascota.imagen.url }}" class="img-thumbnail mb-2" width="150">
+                    {% endif %}
+                    {% if mascota.imagen1 %}
+                        <img src="{{ mascota.imagen1.url }}" class="img-thumbnail mb-2" width="150">
+                    {% endif %}
+                    {% if mascota.imagen2 %}
+                        <img src="{{ mascota.imagen2.url }}" class="img-thumbnail mb-2" width="150">
+                    {% endif %}
+                    {% if mascota.imagen3 %}
+                        <img src="{{ mascota.imagen3.url }}" class="img-thumbnail mb-2" width="150">
+                    {% endif %}
+                    {% if mascota.imagen4 %}
+                        <img src="{{ mascota.imagen4.url }}" class="img-thumbnail mb-2" width="150">
+                    {% endif %}
+                    {% if mascota.imagen5 %}
+                    <img src="{{ mascota.imagen5.url }}" class="img-thumbnail mb-2" width="150">  <!-- Nueva imagen -->
+                {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                <a href="{% url 'mascota:lista_mascotas' %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

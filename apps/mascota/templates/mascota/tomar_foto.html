@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container text-center">
+    <h2 class="my-4">Tomar Foto</h2>
+    
+    <video id="video" autoplay class="border rounded shadow"></video>
+    <br>
+    <button id="capture" class="btn btn-success mt-3">Capturar Foto</button>
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    {% if informe and informe.id %}
+        <form method="POST" enctype="multipart/form-data" action="{% url        'mascota:guardar_foto' informe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="foto" id="foto">
+        <button type="submit" class="btn btn-primary mt-3">Guardar Foto</button>
+        </form>
+    {% else %}
+        <p class="text-danger mt-3">Error: No se encontró el informe.</p>
+    {% endif %}
+</div>
+
+
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureButton = document.getElementById('capture');
+    const fotoInput = document.getElementById('foto');
+
+    // Acceder a la cámara
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => { video.srcObject = stream; })
+        .catch(error => { console.error("No se pudo acceder a la cámara", error); });
+
+    // Capturar imagen
+    captureButton.addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convertir a base64 y guardar en input oculto
+        fotoInput.value = canvas.toDataURL('image/png');
+    });
+</script>
+{% endblock %}

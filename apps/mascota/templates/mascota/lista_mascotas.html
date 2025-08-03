@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<style>
+    .image-container {
+        width: 100%;
+        height: 300px; /* Ajusta este valor según sea necesario */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden; /* Evita que la imagen sobresalga */
+        background-color: #fff; /* Color de fondo para imágenes transparentes */
+    }
+
+    .pet-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain; /* Evita que la imagen se corte */
+        display: block;
+    }
+</style>
+
+<style>
+    .pet-image {
+        height: 250px; /* Ajusta según lo necesario */
+        width: 100%;
+        object-fit: contain; /* Usa 'cover' si prefieres llenar sin bordes */
+        border-radius: 10px; /* Opcional, para dar bordes redondeados */
+        background-color: #f8f9fa; /* Fondo gris claro si la imagen es transparente */
+    }
+
+/* ----------------------Personalizar botones de navegación del carrusel------------ */
+.carousel-control-prev, 
+.carousel-control-next {
+    width: 50px; /* Ajustar el ancho de los botones */
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semi-transparente */
+    border-radius: 50%; /* Botones redondos */
+    transition: background-color 0.3s ease-in-out; /* Suavizar el cambio de color */
+}
+
+/* Cambiar color de las flechas */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: invert(100%); /* Cambia el color de la flecha a blanco */
+    width: 30px;
+    height: 30px;
+}
+
+/* Efecto cuando pasas el cursor (hover) */
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo blanco semi-transparente */
+}
+
+.carousel-control-prev:hover .carousel-control-prev-icon,
+.carousel-control-next:hover .carousel-control-next-icon {
+    filter: invert(0); /* Cambia la flecha a negra cuando pasas el mouse */
+}
+
+
+</style>
+
+<div class="container mt-4">
+    {% if user.is_staff %}
+   
+    
+    <a href="{% url 'mascota:agregar_mascota' %}" class="btn btn-secondary">Agregar Mascota</a>
+
+    <!-- Formulario de búsqueda -->
+    {% if user.is_authenticated %}
+    <form action="{% url 'mascota:lista_mascotas' %}" method="get" class="text-center my-3">
+        <label for="dni_usuario" class="form-label">Ingrese el DNI del Titular:</label>
+        <input type="text" name="dni" id="dni_usuario" 
+               placeholder="DNI del Titular" 
+               value="{{ dni|default_if_none:'' }}" 
+               class="form-control d-inline-block" 
+               style="width: 200px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+        <button type="submit" class="btn btn-primary mt-2">Buscar</button>
+    </form>
+    {% endif %}
+
+    {% endif %}
+
+    {% if mascotas_pagina %}
+        <h5 class="text-center mt-3">
+            {% if dni %}
+                DNI Nº: <strong>{{ dni }} {{ first_name }} {{ last_name }} </strong>
+                {% if imagen_usuario %}
+                    <img src="{{ imagen_usuario.url }}" alt="Imagen del usuario" class="rounded-circle" style="width: 40px;">
+                {% endif %}
+            {% else %}
+                <p style="font-family: 'Bookman Old Style'; font-size: 37px; color: rgb(65, 66, 66);">
+                Mi Familia
+                </p>
+            {% endif %}
+        </h5>
+
+        <div class="row">
+            {% for mascota in mascotas_pagina %}
+            {% if forloop.first or forloop.counter0|divisibleby:3 %}
+            </div><div class="row">  <!-- Nueva fila cada 3 tarjetas -->
+            {% endif %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+
+
+                    <!-- Carrusel de imágenes -->
+                    <div id="carouselMascota{{ mascota.pk }}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% if mascota.imagen or mascota.imagen1 or mascota.imagen2 or mascota.imagen3 or mascota.imagen4 or mascota.imagen5 %}
+                                
+                                {% if mascota.imagen %}
+                                <div class="carousel-item active">
+                                    <img src="{{ mascota.imagen.url }}" class="d-block w-100 pet-image" alt="{{ mascota.nombre }}">
+                                </div>
+                                {% endif %}
+            
+                                {% if mascota.imagen1 %}
+                                <div class="carousel-item {% if not mascota.imagen %}active{% endif %}">
+                                    <img src="{{ mascota.imagen1.url }}" class="d-block w-100 pet-image" alt="{{ mascota.nombre }}">
+                                </div>
+                                {% endif %}
+            
+                                {% if mascota.imagen2 %}
+                                <div class="carousel-item {% if not mascota.imagen and not mascota.imagen1 %}active{% endif %}">
+                                    <img src="{{ mascota.imagen2.url }}" class="d-block w-100 pet-image" alt="{{ mascota.nombre }}">
+                                </div>
+                                {% endif %}
+            
+                                {% if mascota.imagen3 %}
+                                <div class="carousel-item {% if not mascota.imagen and not mascota.imagen1 and not mascota.imagen2 %}active{% endif %}">
+                                    <img src="{{ mascota.imagen3.url }}" class="d-block w-100 pet-image" alt="{{ mascota.nombre }}">
+                                </div>
+                                {% endif %}
+            
+                                {% if mascota.imagen4 %}
+                                <div class="carousel-item {% if not mascota.imagen and not mascota.imagen1 and not mascota.imagen2 and not mascota.imagen3 %}active{% endif %}">
+                                    <img src="{{ mascota.imagen4.url }}" class="d-block w-100 pet-image" alt="{{ mascota.nombre }}">
+                                </div>
+                                {% endif %}
+            
+                                {% if mascota.imagen5 %}
+                                <div class="carousel-item {% if not mascota.imagen and not mascota.imagen1 and not mascota.imagen2 and not mascota.imagen3 and not mascota.imagen4 %}active{% endif %}">
+                                    <img src="{{ mascota.imagen5.url }}" class="d-block w-100 pet-image" alt="{{ mascota.nombre }}">
+                                </div>
+                                {% endif %}
+            
+                            {% else %}
+                            <!-- Imagen por defecto si no hay imágenes cargadas -->
+                            <div class="carousel-item active">
+                                <img src="{% static 'img/default_pet.jpg' %}" class="d-block w-100 pet-image" alt="Imagen por defecto">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        
+            <!-- Botones de navegación -->
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselMascota{{ mascota.pk }}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselMascota{{ mascota.pk }}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        </button>
+                    </div>
+            
+                    <!-- Información de la mascota -->
+                    <div class="card-body text-center bg-dark text-white">
+                        <h5 class="card-title">{{ mascota.nombre }}</h5>
+                        <p class="card-text">{{ mascota.descripcion|truncatewords:20 }}</p>
+                        <p class="card-text"><strong>Edad:</strong> {{ mascota.edad }} años</p>
+                        <p class="card-text"><strong>Especie:</strong> {{ mascota.especie }}</p>
+                        {% if user.is_staff %}
+                            <a href="{% url 'mascota:editar_mascota' mascota.pk %}" class="btn btn-primary mt-2">Editar</a>
+                            <a href="{% url 'mascota:eliminar_mascota' mascota.pk %}" class="btn btn-danger mt-2">Eliminar</a>
+                        {% endif %}
+                        <a href="{% url 'mascota:detalle_mascota' mascota.pk %}" class="btn btn-secondary mt-2">Informe</a>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            
+            
+            
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mt-4">
+                {% if mascotas_pagina.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ mascotas_pagina.previous_page_number }}{% if dni %}&dni={{ dni }}{% endif %}">Anterior</a>
+                </li>
+                {% endif %}
+                
+
+                {% for num in mascotas_pagina.paginator.page_range %}
+                <li class="page-item {% if num == mascotas_pagina.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}{% if dni %}&dni={{ dni }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endfor %}
+
+                {% if mascotas_pagina.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ mascotas_pagina.next_page_number }}{% if dni %}&dni={{ dni }}{% endif %}">Siguiente</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+    <div class="text-center mt-4 p-4" style="border: 2px dashed #dc3545; border-radius: 10px; background-color: #f8d7da; color: #721c24;">
+        <i class="fas fa-paw"></i> <strong>No se encontraron mascotas.</strong>
+    </div>
+    <hr>
+    {% endif %}
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        background-color: #1c1c1c;
+        color: #ffffff;
+    }
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: #4b6cb7;
+        border-color: #4b6cb7;
+    }
+</style>
+
+{% endblock %}

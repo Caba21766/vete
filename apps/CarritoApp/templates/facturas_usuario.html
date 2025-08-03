@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+
+    <h1>Mis Facturas de Compras</h1>
+    {% if facturas %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>N° Factura</th>
+                        <th>Fecha</th>
+                        <th>Método de Pago</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for factura in facturas %}
+                    <tr>
+                        <td>{{ factura.numero_factura }}</td>
+                        <td>{{ factura.fecha }}</td>
+                        <td>{{ factura.metodo_pago }}</td>
+                        <td>${{ factura.total|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'CarritoApp:vista_resumen_factura' factura.id %}" class="btn btn-success btn-sm"><i class="bi bi-eye"></i> Ver </a>
+                            
+                            <a href="{% url 'CarritoApp:levantar_imagen_usuario' factura.id %}" class="btn btn-secondary btn-sm"> <i class="bi bi-upload"></i> Subir Tiket Pagado
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No tienes facturas disponibles.</p>
+    {% endif %}
+
+{% endblock %}
+
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

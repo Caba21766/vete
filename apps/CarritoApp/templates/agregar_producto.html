@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+
+<style>
+    select.form-control-sm,
+    input.form-control-sm {
+        height: 31.6px; /* igual para todos los campos tipo texto y select */
+    }
+</style>
+
+
+<style>
+    .imagen-estilizada {
+        width: 100%;
+        max-width: 280px;
+        padding: 5px;
+        font-size: 0.9rem;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        background-color: #ffffff;
+        display: inline-block;
+        transition: border-color 0.3s;
+    }
+    .imagen-estilizada:focus {
+        border-color: #0d6efd;
+        outline: none;
+        box-shadow: 0 0 0 0.1rem rgba(13, 110, 253, 0.25);
+    }
+</style>
+    
+
+
+<!-- -------------------------------------------------------------- -->    
+    <div class="container my-5">
+        {% if messages %}
+    <div class="mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} text-center" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+<!-- -------------------------------------------------------------- -->
+<!-- -------------------------------------------------------------- -->
+<!-- Sección: Agregar Producto -->
+<div class="card shadow-sm mb-5 border-0">
+    <div class="card-header" style="background-color: #141413; color: #ffffff;">
+        <h3 class="mb-0">Agregar Producto Nuevo</h3>
+    </div>
+
+    <div class="card-body bg-light p-4 rounded">
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+                <!-- Categoría -->
+                <div class="col-md-4">
+                    <label for="{{ form.categoria.id_for_label }}" class="form-label fw-bold text-primary">Categoría</label>
+                    {{ form.categoria|add_class:"form-select form-select-sm" }}
+                    {% if form.categoria.errors %}
+                        <div class="text-danger small">{{ form.categoria.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Número de Producto -->
+                <div class="col-md-4">
+                    <label for="{{ form.numero_producto.id_for_label }}" class="form-label fw-bold text-primary">Código Producto</label>
+                    {{ form.numero_producto|add_class:"form-control form-control-sm text-center" }}
+                    {% if form.numero_producto.errors %}
+                        <div class="text-danger small">{{ form.numero_producto.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Nombre del Producto -->
+                <div class="col-md-4">
+                    <label for="{{ form.nombre_producto.id_for_label }}" class="form-label fw-bold text-primary">Nombre Producto</label>
+                    {{ form.nombre_producto|add_class:"form-control form-control-sm text-center" }}
+                    {% if form.nombre_producto.errors %}
+                        <div class="text-danger small">{{ form.nombre_producto.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <hr>
+                <!-- Descripción -->
+                <div class="col-md-3">
+                    <label for="id_descripcion" class="form-label text-primary fw-bold">Descripción</label>
+                    {{ form.descripcion|add_class:"form-control form-control-sm"|attr:"style:height:50px;"|attr:"onfocus:this.value=''" }}
+                    {% if form.descripcion.errors %}
+                        <div class="text-danger small">{{ form.descripcion.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Imagen Principal -->
+                <hr>
+                <!-- Imagen Principal -->
+                <hr>
+                
+                <!-- Contenedor con estilo profesional para imágenes -->
+                <div class="p-4 mb-4 rounded shadow-sm" style="background-color: #f8f9fa; border: 1px solid #dee2e6;">
+                    <h5 class="text-dark fw-bold mb-3">📸 Imágenes del Producto</h5>
+
+                    <!-- Imagen Principal -->
+                    <div class="mb-3">
+                        <label for="{{ form.imagen.id_for_label }}" class="form-label fw-bold text-primary">Imagen Principal</label>
+                        {{ form.imagen|add_class:"form-control form-control-sm imagen-estilizada" }}
+                        {% if form.imagen.errors %}
+                            <div class="text-danger small">{{ form.imagen.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Imágenes adicionales -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.imagen2.id_for_label }}" class="form-label fw-bold text-primary">Imagen 1</label>
+                            {{ form.imagen2|add_class:"form-control form-control-sm imagen-estilizada" }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.imagen3.id_for_label }}" class="form-label fw-bold text-primary">Imagen 2</label>
+                            {{ form.imagen3|add_class:"form-control form-control-sm imagen-estilizada" }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.imagen4.id_for_label }}" class="form-label fw-bold text-primary">Imagen 3</label>
+                            {{ form.imagen4|add_class:"form-control form-control-sm imagen-estilizada" }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.imagen5.id_for_label }}" class="form-label fw-bold text-primary">Imagen 4</label>
+                            {{ form.imagen5|add_class:"form-control form-control-sm imagen-estilizada" }}
+                        </div>
+                    </div>
+                    <!-- Stock (Oculto con CSS pero sigue en el formulario) -->
+                    <div class="col-md-4" style="display: none;">
+                        <label for="id_stock" class="form-label text-primary fw-bold">Stock</label>
+                        <input type="number" id="id_stock" name="stock"
+                            class="form-control form-control-sm text-center"
+                            value="{{ form.stock.value|default_if_none:'0' }}"
+                            placeholder="Cantidad en stock"
+                            style="font-size: 0.9rem; max-width: 150px;">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_precio" class="form-label text-primary fw-bold">Precio Venta</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.precio }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Botón de Enviar -->
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary px-4">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Sección: Actualizar Precios -->
+        <div class="card shadow-sm mb-5" style="background-color: #e0e6e2;">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">Actualizar Precios</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'CarritoApp:actualizar_precios' %}">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="categoria" class="form-label">Seleccionar Categoría</label>
+                            <select name="categoria" id="categoria" class="form-select">
+                                <option value="">Todas</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="porcentaje" class="form-label">Porcentaje (%)</label>
+                            <input type="number" name="porcentaje" id="porcentaje" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-success">Act. Precios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sección: Listado de Productos -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h3 class="mb-0">Listado de Productos</h3>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{% url 'CarritoApp:agregar_producto' %}" class="mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="filtro_categoria" class="form-label">Elegir Categoría</label>
+                            <select name="categoria" id="filtro_categoria" class="form-select">
+                                <option value="">Todas</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}" {% if categoria.id|stringformat:"s" == request.GET.categoria %}selected{% endif %}>
+                                        {{ categoria.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button type="submit" class="btn btn-info">Filtrar</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nº Produto</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Categoría</th>
+                                <th>Imagen</th>
+                                <th>Stock</th>
+                                <th>Precio Vta</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos %}
+                            <tr>
+                                <td>{{ producto.numero_producto }}</td>
+                                <td>{{ producto.nombre_producto }}</td>
+                                <td>{{ producto.descripcion }}</td>
+                                <td>{{ producto.categoria.nombre }}</td>
+                                <td>
+                                    {% if producto.imagen %}
+                                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre_producto }}" width="50" class="rounded">
+                                    {% else %}
+                                        Sin Imagen
+                                    {% endif %}
+                                </td>
+                                <td>{{ producto.stock }}</td>
+                                <td>${{ producto.precio }}</td>
+
+                                <td>
+                                    <a href="{% url 'CarritoApp:modificar_producto' producto.id %}" 
+                                       class="btn btn-secondary btn-sm" title="Editar">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <a href="{% url 'CarritoApp:eliminar_producto' producto.id %}" 
+                                       class="btn btn-danger btn-sm" title="Eliminar">
+                                        <i class="bi bi-x-lg"></i>
+                                    </a>
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const input = document.querySelector('input[name="{{ form.nombre_producto.name }}"]');
+            
+            if (input) {
+                input.addEventListener("focus", function() {
+                    if (input.value === "Nombre del producto") {
+                        input.value = "";
+                    }
+                });
+            }
+        });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const descripcionInput = document.getElementById("id_descripcion");
+    
+        descripcionInput.addEventListener("focus", function() {
+            if (this.dataset.clickeado !== "true") {
+                this.value = "";
+                this.dataset.clickeado = "true";
+            }
+        });
+    });
+    </script>
+
+
+
+
+{% endblock %}
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

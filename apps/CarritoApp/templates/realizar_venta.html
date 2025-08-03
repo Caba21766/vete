@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Realizar Venta</title>
+</head>
+<body>
+    <h1>Realizar Venta</h1>
+
+    <!-- Mensaje de confirmación o error -->
+    {% if mensaje %}
+    {% if "éxito" in mensaje %}
+        <p style="color: green;">{{ mensaje }}</p>
+    {% else %}
+        <p style="color: red;">{{ mensaje }}</p>
+    {% endif %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Registrar Venta</button>
+    </form>
+
+    <h2>Listado de Ventas</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Factura Número</th>
+                <th>Fecha de Venta</th>
+                <th>Cantidad</th>
+                <th>Stock Actual</th> <!-- Nueva columna -->
+                <th>Precio</th>
+                <th>Producto</th>
+                <th>Imagen</th>
+                <th>Categoría</th>
+                <th>Usuario</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venta in ventas %}
+            <tr>
+                <td>{{ venta.id }}</td>
+                <td>{{ venta.fecha }}</td>
+                <td>{{ venta.cantidad }}</td>
+                <td>{{ venta.producto.stock }}</td> <!-- Muestra el stock actual -->
+                <td>{{ venta.precio }}</td>
+                <td>{{ venta.producto.nombre_producto }}</td>
+                <td>
+                    {% if venta.producto.imagen %}
+                        <img src="{{ venta.producto.imagen.url }}" alt="{{ venta.producto.nombre_producto }}" width="50">
+                    {% else %}
+                        Sin Imagen
+                    {% endif %}
+                </td>
+                <td>{{ venta.producto.categoria.nombre }}</td>
+                <td>{{ venta.usuario.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

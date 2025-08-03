@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<div class="container my-5">
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% endif %}
+    <!-- Título principal -->
+    <h1 class="text-center text-primary mb-4">Agregar Compra</h1>
+
+    <!-- Mensaje de éxito -->
+    {% if success %}
+        <p class="alert alert-success text-center">¡Compra guardada exitosamente!</p>
+    {% endif %}
+
+
+    <!-- Formulario de agregar compra -->
+    <div class="card shadow-sm mb-4" style="background-color: #f3f0f0;">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="id_numero_producto" class="form-label">Nº producto</label>
+                        <input type="text" id="id_numero_producto" class="form-control form-control-sm" name="numero_producto">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="id_producto" class="form-label">Producto</label>
+                        <input type="text" id="id_producto" class="form-control form-control-sm" name="producto_id">
+                        <ul id="sugerencias" class="list-group" style="position: absolute; z-index: 1000; display: none;"></ul>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_cantidad" class="form-label">Cantidad</label>
+                        {{ form.cantidad }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="id_stock" class="form-label text-primary fw-bold">Stock</label>
+                        <input type="text" id="id_stock" name="stock"
+                               class="form-control form-control-sm text-center"
+                               value=""
+                               readonly
+                               style="font-size: 0.8rem; max-width: 80px;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_precio_compra" class="form-label">Precio Compra</label>
+                        {{ form.precio_compra }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_factura_compra" class="form-label">Factura Compra</label>
+                        {{ form.factura_compra }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_fecha_compra" class="form-label">Fecha de Compra</label>
+                        <input type="date" name="fecha_compra" id="id_fecha_compra" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_provedor" class="form-label">Proveedor</label>
+                        {{ form.provedor }}
+                    </div>
+                </div>
+
+
+
+                
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary btn-sm">Guardar Compra</button>
+                </div>
+            </form>
+
+<!----------------------------------------------------------------------------->
+<!---------------- buscar_productos------------------///-->                   
+<script>
+    const inputProducto = document.getElementById('id_producto');
+    const listaSugerencias = document.getElementById('sugerencias');
+
+    inputProducto.addEventListener('input', function () {
+        const query = inputProducto.value;
+    //---------------- Buscar_productos------------------///
+    if (query.length > 0) {
+        fetch(`/CarritoApp/buscar_productos/?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+    // Limpiar las sugerencias anteriores
+        listaSugerencias.innerHTML = '';
+        listaSugerencias.style.display = 'block';
+
+        // Agregar las nuevas sugerencias
+        data.productos.forEach(producto => {
+        const li = document.createElement('li');
+        li.textContent = producto.nombre_producto;
+        li.className = 'list-group-item';
+        li.style.cursor = 'pointer';
+
+    li.addEventListener('click', function () {
+        inputProducto.value = producto.nombre_producto; // Asigna el nombre del producto al campo visible
+
+        document.getElementById('id_producto').value = producto.nombre_producto; // Asegúrate de que sea el nombre visible
+        document.getElementById('id_numero_producto').value = producto.numero_producto;
+
+
+        listaSugerencias.style.display = 'none';
+        });
+        listaSugerencias.appendChild(li);
+        });
+        })
+        .catch(error => {
+        console.error('Error al buscar productos:', error);
+        });
+    } else {
+        listaSugerencias.style.display = 'none';
+        }
+    });
+
+
+    document.addEventListener('click', function (e) {
+        if (!listaSugerencias.contains(e.target) && e.target !== inputProducto) {
+            listaSugerencias.style.display = 'none';
+        }
+    });
+</script>
+
+<!---------------- buscarNombreProducto------------------///-->
+<script>
+    // Función para buscar el nombre del producto usando AJAX
+    function buscarNombreProducto() {
+        const numeroProducto = document.getElementById('id_numero_producto').value;
+
+        // Realizar la petición AJAX
+        fetch(`/obtener-producto/?numero_producto=${numeroProducto}`)
+            .then(response => response.json())
+            .then(data => {
+                // Actualizar el campo de producto con el nombre obtenido
+                const productoInput = document.getElementById('id_producto');
+                productoInput.value = data.nombre_producto || ''; // Vacío si no se encuentra
+            })
+            .catch(error => {
+                console.error('Error al buscar el producto:', error);
+            });
+    }
+    // Agregar evento al campo "Nº producto"
+    document.getElementById('id_numero_producto').addEventListener('input', buscarNombreProducto);
+</script>
+                    
+<!---------------- obtener-nombre-producto------------------///-->
+<script>
+    document.getElementById('id_numero_producto').addEventListener('input', function() {
+    const numeroProducto = this.value;
+
+    // Realiza una solicitud al backend
+    fetch(`/CarritoApp/api/obtener-nombre-producto/?numero_producto=${numeroProducto}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Actualiza el campo "Producto" con el nombre devuelto por el backend
+            const nombreProducto = data.nombre_producto || ''; // Valor vacío si no se encuentra
+            document.getElementById('id_producto').value = nombreProducto;
+        })
+        .catch(error => {
+            console.error('Error al obtener el nombre del producto:', error);
+            document.getElementById('id_producto').value = ''; // Deja el campo vacío en caso de error
+        });
+    });
+    </script>
+                    
+<!---------------- obtener-numero-producto------------------///-->
+    <script>
+        document.getElementById('id_producto').addEventListener('input', function() {
+            const nombreProducto = this.value; // Obtiene el valor del campo "Producto"
+
+            // Realiza una solicitud al backend
+            fetch(`/CarritoApp/api/obtener-numero-producto/?nombre_producto=${encodeURIComponent(nombreProducto)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Actualiza el campo "Nº producto" con el número obtenido
+                    document.getElementById('id_numero_producto').value = data.numero_producto || '';
+                })
+                .catch(error => {
+                    console.error('Error al obtener el número del producto:', error);
+                });
+        });
+    </script>
+                    
+    <!---------------- buscar_productos------------------///-->
+    <script>
+        document.getElementById('id_producto').addEventListener('input', function () {
+            const query = this.value;
+    
+            // Si el campo está vacío, limpiar sugerencias
+            if (!query.trim()) {
+                document.getElementById('sugerencias').innerHTML = '';
+                return;
+            }
+    
+            fetch(`/buscar_productos/?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const sugerencias = document.getElementById('sugerencias');
+                    sugerencias.innerHTML = '';
+    
+                    // Mostrar las sugerencias
+                    data.productos.forEach(producto => {
+                        const item = document.createElement('div');
+                        item.classList.add('sugerencia-item');
+                        item.textContent = `${producto.nombre_producto} (${producto.numero_producto})`;
+                        item.addEventListener('click', function () {
+                            document.getElementById('id_producto').value = producto.nombre_producto;
+                            document.getElementById('id_numero_producto').value = producto.numero_producto;
+                            sugerencias.innerHTML = '';
+                        });
+                        sugerencias.appendChild(item);
+                    });
+                });
+        });
+    </script>
+
+<!---------------- obtener-stock------------------///-->    
+<script>
+    document.getElementById('id_numero_producto').addEventListener('input', function() {
+        const numeroProducto = this.value.trim(); // Obtiene el código del producto
+
+        if (numeroProducto) {
+            fetch(`/CarritoApp/api/obtener-stock/?numero_producto=${numeroProducto}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Si hay stock, actualizar el campo de stock
+                    document.getElementById('id_stock').value = data.stock || '0';
+                })
+                .catch(error => {
+                    console.error('Error al obtener el stock:', error);
+                    document.getElementById('id_stock').value = '0'; // En caso de error, dejar en 0
+                });
+        } else {
+            document.getElementById('id_stock').value = ''; // Si el campo está vacío, limpiar stock
+        }
+    });
+</script>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

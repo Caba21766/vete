@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+
+{% block contenido %}
+
+
+<!-- Estilos específicos para la página -->
+<style>
+    .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    h1, h2 {
+        color: #333;
+        font-weight: bold;
+    }
+
+    /* Estilos para el formulario */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #218838;
+    }
+
+    hr {
+        border: 1px solid #1f1b1b;
+        margin: 20px 0;
+    }
+
+    /* Estilos para la tabla */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th, .table td {
+        padding: 12px;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    .table td {
+        background-color: #ffffff;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #e9ecef;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 12px;
+        margin-right: 5px;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    /* Responsividad */
+    @media (max-width: 767px) {
+        .table th, .table td {
+            padding: 8px;
+        }
+
+        button {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .form-control {
+            padding: 6px;
+            font-size: 14px;
+        }
+    }
+</style>
+
+<div class="container">
+    <h1>Agregar Categoría</h1>
+
+    <!-- Formulario para agregar categoría -->
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="nombre">Nombre de la Categoría:</label>
+            {{ form.nombre }}
+        </div>
+        <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+    </form>
+
+    <hr>
+
+    <!-- Tabla para el listado de categorías existentes -->
+    <h2>Categorías Existentes</h2>
+    {% if categorias %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Nombre de la Categoría</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for categoria in categorias %}
+                <tr>
+                    <td>{{ categoria.nombre }}</td>
+                    <td>
+                        <a href="?edit_id={{ categoria.id }}" class="btn btn-secondary  btn-sm">Modificar</a>
+                        <a href="?delete_id={{ categoria.id }}" class="btn btn-primary  btn-sm" 
+                           onclick="return confirm('¿Estás seguro de eliminar esta categoría?')">Borrar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p>No hay categorías disponibles.</p>
+    {% endif %}
+</div>
+
+
+
+{% endblock %}
+
+    {% block footer %}
+    {% include 'footer.html' %}
+    {% endblock %}

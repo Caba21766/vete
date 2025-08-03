@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<div class="container py-4">
+    <h2>Pagos de Cuenta Corriente - Factura {{ factura.numero_factura }} {{ factura.nombre_cliente }} {{ factura.apellido_cliente }}</h2>
+    <hr>
+    {% if pagos %}
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Fecha Cuota</th>
+                    <th>Cuota Total</th>
+                    <th>Cuota Paga</th>
+                    <th>Cuota Debe</th>
+                    <th>Importe Pagado</th>
+                    <th>Entrega Cta</th>
+                    <th>Método de Pago</th> <!-- 👈 Nueva columna -->
+                    <th>Estado Crédito (Factura)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pago in pagos %}
+                    <tr>
+                        <td>{{ pago.fecha_cuota }}</td>
+                        <td>{{ pago.cuota_total }}</td>
+                        <td>{{ pago.cuota_paga }}</td>
+                        <td>{{ pago.cuota_debe }}</td>
+                        <td>${{ pago.imp_cuota_pagadas|floatformat:2 }}</td>
+                        <td>${{ pago.entrega_cta|floatformat:2 }}</td>
+                        <td>{{ pago.metodo_pago_display }}</td>
+                        <td>
+                           {% if factura.metodo_pago_manual == "Cuenta Corriente" %}
+                                    {% if factura.estado_credito == "Pagado" %}
+                                        <span class="text-success fw-bold">Pagado</span>
+                                    {% else %}
+                                        <span class="text-danger fw-bold">Pendiente</span>
+                                    {% endif %}
+                                {% elif factura.metodo_pago and factura.metodo_pago.tarjeta_nombre == "Cuenta Corriente" %}
+                                    {% if factura.estado_credito == "Pagado" %}
+                                        <span class="text-success fw-bold">Pagado</span>
+                                    {% else %}
+                                        <span class="text-danger fw-bold">Pendiente</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-success fw-bold">Pagado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay pagos registrados para esta factura.</p>
+    {% endif %}
+    <a href="{% url 'CarritoApp:lista_cuenta_corriente' %}" class="btn btn-secondary mt-3">Volver</a>
+</div>
+{% endblock %}

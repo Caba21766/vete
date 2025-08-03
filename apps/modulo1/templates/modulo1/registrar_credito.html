@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Crédito para Factura Nº {{ factura.numero_factura }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input {
+            padding: 8px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .back-link {
+            display: block;
+            margin-top: 15px;
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Registrar Crédito para Factura Nº {{ factura.numero_factura }}</h1>
+    <p><strong>Cliente:</strong> {{ factura.nombre_cliente }} {{ factura.apellido_cliente }}</p>
+    <p><strong>Total de la factura:</strong> ${{ factura.total }}</p>
+
+    <h2>Formulario de Crédito</h2>
+    <form method="POST">
+        {% csrf_token %}
+        
+        <!-- ID de la factura oculto -->
+        <input type="hidden" name="factura_id" value="{{ factura.id }}">
+    
+        <label for="cuotas">Cantidad de Cuotas:</label>
+        <input type="number" id="cuotas" name="cuotas" min="1" placeholder="Ej: 3" required>
+    
+        <label for="interes">Interés (%):</label>
+        <input type="number" id="interes" name="interes" step="0.01" placeholder="Ej: 10" required>
+    
+        <button type="submit">Registrar Crédito</button>
+    </form>
+    
+    <a class="back-link" href="{% url 'listar_ctacorriente' %}">Volver a Cuenta Corriente</a>
+</div>
+</body>
+{% endblock %}

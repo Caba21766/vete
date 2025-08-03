@@ -1,0 +1,120 @@
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <section style="margin-top: 5%;" data-bs-version="5.1" class="form4 cid-tf6M1H8RDD" id="form4-edit-user">
+        <div class="container">
+            <div class="row content-wrapper justify-content-center align-items-center">
+                <!-- Formulario -->
+                <div class="col-lg-6 col-md-8 mbr-form">
+                    <div class="dragArea row">
+                        <div class="col-lg-12">
+                            <h1 class="mbr-section-title mb-4 display-4 text-center"><strong>Modificar Datos</strong></h1>
+                        </div>
+
+                        <!-- Campos del formulario -->
+                        <div class="col-lg-12">
+                            <!-- Nombre de usuario -->
+                            <div class="form-group mb-3">
+                                {{ form.username.label_tag }}
+                                {{ form.username|add_class:"form-control form-control-lg" }}
+                                {% if form.username.errors %}
+                                    <div class="text-danger">{{ form.username.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Nombre -->
+                            <div class="form-group mb-3">
+                                {{ form.first_name.label_tag }}
+                                {{ form.first_name|add_class:"form-control form-control-lg" }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger">{{ form.first_name.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Apellido -->
+                            <div class="form-group mb-3">
+                                {{ form.last_name.label_tag }}
+                                {{ form.last_name|add_class:"form-control form-control-lg" }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger">{{ form.last_name.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group mb-3">
+                                {{ form.email.label_tag }}
+                                {{ form.email|add_class:"form-control form-control-lg" }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger">{{ form.email.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- DNI -->
+                            <div class="form-group mb-3">
+                                {{ form.DNI_usuario.label_tag }}
+                                {{ form.DNI_usuario|add_class:"form-control form-control-lg" }}
+                                {% if form.DNI_usuario.errors %}
+                                    <div class="text-danger">{{ form.DNI_usuario.errors|first }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.cuil.id_for_label }}">CUIL:</label>
+                                {{ form.cuil }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.iva.id_for_label }}">Condición de IVA:</label>
+                                {{ form.iva }}
+                            </div>
+
+                            <!-- Domicilio -->
+                            <div class="form-group mb-3">
+                                {{ form.domicilio_usuario.label_tag }}
+                                {{ form.domicilio_usuario|add_class:"form-control form-control-lg" }}
+                                {% if form.domicilio_usuario.errors %}
+                                    <div class="text-danger">{{ form.domicilio_usuario.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Teléfono 1 -->
+                            <div class="form-group mb-3">
+                                {{ form.tel1_usuario.label_tag }}
+                                {{ form.tel1_usuario|add_class:"form-control form-control-lg" }}
+                                {% if form.tel1_usuario.errors %}
+                                    <div class="text-danger">{{ form.tel1_usuario.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Teléfono 2 -->
+                            <div class="form-group mb-3">
+                                {{ form.tel2_usuario.label_tag }}
+                                {{ form.tel2_usuario|add_class:"form-control form-control-lg" }}
+                                {% if form.tel2_usuario.errors %}
+                                    <div class="text-danger">{{ form.tel2_usuario.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Foto Perfil -->
+                            <div class="form-group mb-3">
+                                {{ form.imagen_usuario.label_tag }}
+                                {{ form.imagen_usuario|add_class:"form-control form-control-lg" }}
+                                {% if form.imagen_usuario.errors %}
+                                    <div class="text-danger">{{ form.imagen_usuario.errors|first }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Botón de envío -->
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Guardar1</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+
+
+
+
+
+
+

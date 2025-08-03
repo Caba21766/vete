@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container my-5">
+    <h1 class="text-center text-danger">Error de Stock</h1>
+    <p>No se pudo procesar la factura porque uno o más productos exceden la cantidad disponible en stock. Por favor, ajusta las cantidades en tu carrito.</p>
+
+    <ul class="list-group my-4">
+        {% for error in errores_stock %}
+        <li class="list-group-item">
+            <strong>{{ error.nombre_producto }}</strong>: 
+            Stock disponible: {{ error.stock_disponible }}, 
+            Cantidad solicitada: {{ error.cantidad_solicitada }}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <div class="text-center">
+        <a href="{% url 'CarritoApp:carrito' %}" class="btn btn-secondary">Regresar al Carrito</a>
+    </div>
+</div>
+{% endblock %}

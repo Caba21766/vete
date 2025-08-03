@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<h2>Lista de Categorías</h2>
+<ul>
+    {% for categoria in categorias %}
+    <li>{{ categoria.nombre }}
+        <a href="{% url 'actualizar_categoria' categoria.pk %}">Editar</a>
+        <a href="{% url 'eliminar_categoria' categoria.pk %}">Eliminar</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

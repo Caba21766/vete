@@ -1,0 +1,12 @@
+env311/
+__pycache__/
+*.pyc
+*.log
+*.sqlite3
+*.zip
+media/
+staticfiles/
+*.crt
+*.pem
+*.key
+.DS_Store
