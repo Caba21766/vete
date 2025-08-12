@@ -1,13 +1,12 @@
 # Python
 __pycache__/
 *.py[cod]
-*.sqlite3
+*.log
 
-# Entornos / dependencias
+# Entornos
 env/
 venv/
 .env
-*.log
 
 # Django
 media/
