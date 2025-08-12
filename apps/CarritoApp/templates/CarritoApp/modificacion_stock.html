@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+    {% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">Listado o Modificación de Stock</h1>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>Nombre del Producto</th>
+                    <th>Stock Disponible</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto.nombre_producto }}</td>
+                    <td class="text-center">{{ producto.stock }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'CarritoApp:modificar_stock' producto.id %}" class="btn btn-primary btn-sm">
+                            Modificar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'CarritoApp:balance_total' %}" class="btn btn-secondary">
+            Volver al Balance
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}

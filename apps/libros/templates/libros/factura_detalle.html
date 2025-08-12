@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block navegacion %}
+    {% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Factura Nº {{ factura.numero_factura }}</title>
+        <script>
+            window.onload = function() {
+                if (!sessionStorage.getItem("reloaded")) {
+                    sessionStorage.setItem("reloaded", "true");
+                    location.reload();
+                }
+            };
+            </script>
+    </head>
+    <body class="container mt-4">
+        <div class="card p-4 shadow-sm">
+            <h1 class="text-end">Factura Nº: {{ factura.numero_factura }}</h1>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Cliente:</strong> {{ factura.nombre_cliente }} {{ factura.apellido_cliente }}</p>
+                    <p><strong>Fecha:</strong> {{ factura.fecha }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Pago:</strong> {{ factura.metodo_pago }}</p>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-4">
+                    <p class="total">Total Producto: <strong>${{ factura.total }}</strong></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="total">Desc %: <strong>${{ factura.descuento }}</strong></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="total">Importe: <strong>${{ factura.total_descuento }}</strong></p>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-4">
+                    <p class="total">Interés %: <strong>{{ factura.interes }}</strong></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="total">Cuota Nº: <strong>{{ factura.cuotas }}</strong></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="total">Cuota Neta: <strong>${{ factura.cuota_mensual }}</strong></p>
+                </div>
+            </div>
+            <hr>
+            
+        </div>
+
+        <div class="card mt-4 p-4 shadow-sm">
+            <h2>Historial de Pagos</h2>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Factura Nº</th>
+                            <th>Descripción</th>
+                            <th>Fecha de Pago</th>
+                            <th>Imp. Cuota Pagada</th>
+                            <th>Entrega a Cuenta</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pago in factura.cuenta_corriente.all %}
+                            <tr>
+                                <td>{{ pago.numero_factura }}</td>
+                                <td>{{ pago.descripcion }}</td>
+                                <td>{{ pago.fecha_cuota }}</td>
+                                <td>${{ pago.imp_cuota_pagadas }}</td>
+                                <td>${{ pago.entrega_cta }}</td>
+                                <td>{{ pago.estado_credito }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No hay pagos registrados</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <p>Depuración en plantilla: Total Pagos = ${{ pago.imp_cuota_pagadas |floatformat:2 }}</p>
+
+        {% if factura_id %}
+        <a href="{% url 'libros:listar_cuenta_corriente' factura_id %}" class="btn btn-primary">Volver</a>
+        {% else %}
+        <p>Error: No se encontró el ID de la factura.</p>
+        {% endif %}
+
+    </body>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<div class="container my-5 text-center">
+    <h1 class="text-info">Pago pendiente</h1>
+    <p class="lead">Tu pago está siendo procesado. Te notificaremos cuando se acredite.</p>
+    <a href="{% url 'CarritoApp:tienda' %}" class="btn btn-secondary mt-3">Volver a la tienda</a>
+</div>
+{% endblock %}

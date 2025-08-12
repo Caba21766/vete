@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+    {% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">Balance de Ganancias</h2>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nombre del Producto</th>
+                    <th>Precio Total de Compra</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos_con_precios %}
+                <tr>
+                    <td>{{ producto.producto__nombre_producto }}</td>
+                    <td>$ {{ producto.precio_compra|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}

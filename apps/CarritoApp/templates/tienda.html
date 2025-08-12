@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+
+{% block contenido %}
+<div class="container">
+<!-- 🔹 Mostrar mensaje si el usuario NO está autenticado -->
+    {% if not user.is_authenticated %}
+        <div class="container text-center mt-3">
+            <div class="alert alert-danger custom-error-message mx-auto" role="alert">
+                Hola..., Inicia Sesión o Registrate para hacer compras.
+            </div>
+        </div>
+    {% endif %}
+
+
+<style>
+        .titulo-grueso {
+            color: #1a1918;
+            font-weight: 900;
+        }
+
+        .badge {
+        font-size: 0.75rem;
+        padding: 4px 6px;
+        }
+
+/* Personalizar los iconos de navegación del carrusel */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semi-transparente */
+    border-radius: 50%; /* Hace que la flecha tenga forma circular */
+    padding: 15px; /* Ajusta el tamaño del icono */
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* Efecto al pasar el mouse sobre las flechas */
+.carousel-control-prev:hover .carousel-control-prev-icon,
+.carousel-control-next:hover .carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.8); /* Oscurece un poco más al pasar el mouse */
+    transform: scale(1.1); /* Hace un pequeño zoom */
+}
+
+/* Eliminar cualquier contorno o efecto azul en algunos navegadores */
+.carousel-control-prev,
+.carousel-control-next {
+    background: none !important; /* Quita cualquier fondo predeterminado */
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+/* Ajuste para mejorar la visibilidad */
+.carousel-control-prev,
+.carousel-control-next {
+    width: 8%; /* Reduce el ancho del área clickeable */
+}
+
+/* Ajustar el tamaño y alineación de las imágenes */
+.carousel-item img {
+    width: 100%; /* Asegura que la imagen ocupe todo el ancho disponible */
+    height: 250px; /* Mantiene una altura uniforme en todas las imágenes */
+    object-fit: cover; /* Recorta la imagen sin deformarla */
+    border-radius: 10px; /* Bordes redondeados para un diseño más profesional */
+}
+</style>
+<style>
+    .texto-estilizado {
+        font-family: 'Book Antiqua', Georgia, serif;
+        font-size: 1.7rem; /* Cambiá esto para ajustar el tamaño */
+        color: #2c3e50;   /* Cambiá esto para el color */
+        letter-spacing: 0.5px;
+    }
+</style>
+
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1 class="titulo-grueso text-start texto-estilizado" style="font-size: 1rem;">
+                <strong> Ecommerce: Gustavo Caballero - 3644-563925  </strong>
+            </h1>
+        </div>
+    </div>
+
+    <!-- Filtro y Carrito -->
+    <div class="row mb-3 d-flex align-items-center">
+        <div class="col-12 col-md-8">
+            
+
+<form method="get" action="" class="d-flex flex-column flex-sm-row align-items-center">
+    <label for="categoria" class="me-2 small fw-bold">Categoría:</label>
+    <select name="categoria" id="categoria" class="form-select form-select-sm me-2">
+        <option value="">--Todas las Categorías--</option>
+        {% for categoria in categorias %}
+        <option value="{{ categoria.id }}" {% if categoria.id == categoria_seleccionada %}selected{% endif %}>
+            {{ categoria.nombre }}
+        </option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm d-flex align-items-center px-2 py-1" style="font-size: 0.75rem;">
+        <i class="bi bi-search me-1" style="font-size: 0.9rem;"></i> Buscar
+    </button>
+</form>
+
+</div>
+        <div class="col-12 col-md-4 text-end mt-2 mt-md-0">
+            <a href="{% url 'CarritoApp:ver_carrito' %}" class="btn btn-secondary btn-sm position-relative">
+                <i class="bi bi-cart3"></i> Carrito
+                {% if request.session.carrito %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ request.session.carrito|length }}
+                    </span>
+                {% endif %}
+            </a>
+        </div>
+</div>
+
+
+<!-- Productos: 5 por fila SIEMPRE -->
+<div class="container-fluid px-3">
+  <div class="row g-4 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+    {% for producto in productos_pagina %}
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+
+          <!-- Carrusel de imágenes -->
+          <div id="carouselProducto{{ producto.pk }}" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              {% if producto.imagen or producto.imagen2 or producto.imagen3 or producto.imagen4 or producto.imagen5 %}
+                {% if producto.imagen %}
+                <div class="carousel-item active">
+                  <img src="{{ producto.imagen.url }}" class="d-block w-100" alt="{{ producto.nombre_producto }}">
+                </div>
+                {% endif %}
+                {% if producto.imagen2 %}
+                <div class="carousel-item {% if not producto.imagen %}active{% endif %}">
+                  <img src="{{ producto.imagen2.url }}" class="d-block w-100" alt="{{ producto.nombre_producto }}">
+                </div>
+                {% endif %}
+                {% if producto.imagen3 %}
+                <div class="carousel-item {% if not producto.imagen and not producto.imagen2 %}active{% endif %}">
+                  <img src="{{ producto.imagen3.url }}" class="d-block w-100" alt="{{ producto.nombre_producto }}">
+                </div>
+                {% endif %}
+                {% if producto.imagen4 %}
+                <div class="carousel-item {% if not producto.imagen and not producto.imagen2 and not producto.imagen3 %}active{% endif %}">
+                  <img src="{{ producto.imagen4.url }}" class="d-block w-100" alt="{{ producto.nombre_producto }}">
+                </div>
+                {% endif %}
+                {% if producto.imagen5 %}
+                <div class="carousel-item {% if not producto.imagen and not producto.imagen2 and not producto.imagen3 and not producto.imagen4 %}active{% endif %}">
+                  <img src="{{ producto.imagen5.url }}" class="d-block w-100" alt="{{ producto.nombre_producto }}">
+                </div>
+                {% endif %}
+              {% else %}
+                <div class="carousel-item active">
+                  <img src="{% static 'img/default_product.jpg' %}" class="d-block w-100" alt="Imagen por defecto">
+                </div>
+              {% endif %}
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto{{ producto.pk }}" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto{{ producto.pk }}" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <!-- Info -->
+          <div class="card-body text-center">
+            <h5 class="card-title">{{ producto.nombre_producto }}</h5>
+            <p class="card-text" style="color:#4d130d;font-weight:bold;">Descripción: {{ producto.descripcion }}</p>
+            <p class="card-text" style="color:#21237a;font-weight:bold;">Precio: ${{ producto.precio }}</p>
+            <p class="card-text"><strong>Stock:</strong> {{ producto.stock }}</p>
+
+            <a href="{% url 'opiniones:agregar_opinion' producto.id %}" class="btn btn-secondary btn-sm">Consulta</a>
+            {% if producto.stock > 0 %}
+              <a href="{% url 'CarritoApp:Add' producto.id %}" class="btn btn-primary btn-sm">Comprar</a>
+            {% else %}
+              <button class="btn btn-outline-danger btn-sm" disabled>Sin stock</button>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+
+
+
+<!-- Navegación de Páginas -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if productos_pagina.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ productos_pagina.previous_page_number }}">Anterior</a>
+            </li>
+            {% endif %}
+            {% for num in productos_pagina.paginator.page_range %}
+            <li class="page-item {% if num == productos_pagina.number %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if productos_pagina.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ productos_pagina.next_page_number }}">Ir</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

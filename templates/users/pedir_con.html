@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+<!-- profile.html -->
+
+
+{% block contenido %}
+<div class="profile-upload-container" style="text-align: center; margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+    <h1 style="font-size: 1.5rem; color: #4CAF50;">Comunicarse con el Administrador...!!!</h1>
+    <p style="font-size: 1rem; color: #555;">Gracias...</p>
+
+    {% if profile_images %}
+        <img src="{{ MEDIA_URL }}profile_images/images.jfif" alt="Imagen de perfil" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin-top: 10px;">
+    
+    {% endif %}
+</div>
+
+{% endblock %}

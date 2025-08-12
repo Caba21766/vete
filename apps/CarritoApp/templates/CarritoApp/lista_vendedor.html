@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<style>
+    .tabla-facturas td,
+    .tabla-facturas th {
+        text-align: justify;           /* Justificación del texto */
+        font-size: 0.85rem;            /* Letra más pequeña */
+        vertical-align: middle;       /* Centrado vertical */
+        padding: 6px 4px;              /* Espaciado más compacto */
+    }
+
+    .tabla-facturas td img {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .tabla-facturas .btn-sm {
+        font-size: 0.75rem;
+        padding: 3px 6px;
+    }
+
+    .tabla-facturas select.form-select-sm {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+    }
+</style>
+
+<style>
+    #dni_cliente,
+    #fecha_desde {
+        height: 31.6px; /* ajusta según el alto real del input date */
+    }
+</style>
+
+<style>
+  .sep-fecha td {
+    border-top: 2px solid #0d6efd; /* línea divisoria */
+    background: #f8f9fa;           /* leve contraste */
+    font-weight: 600;
+  }
+</style>
+
+
+<div class="card shadow-sm mb-4" style="background-color:#f8f9fa;">
+  <div class="card-header bg-white border-0">
+    <h5 class="m-0 text-primary fw-bold">Lista por Vendedores</h5>
+  </div>
+  <div class="card-body">
+    <!-- tu formulario -->
+  </div>
+</div>
+
+<!-- Formulario de filtro --> 
+<div class="card shadow-sm mb-4" style="background-color: #f8f9fa;">
+    <div class="card-body">
+        <form method="GET" action="" class="row g-3">
+            <div class="col-md-3">
+                <label for="dni_cliente" class="form-label">Nombre Vendedor</label>
+
+                <select id="vendedor" name="vendedor" class="form-select form-select-sm" style="height: 31.6px;">
+                    <option value="">-- Seleccionar Vendedor --</option>
+                    {% for nombre in vendedores %}
+                        <option value="{{ nombre }}" {% if vendedor == nombre %}selected{% endif %}>
+                            {{ nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+            </div>
+            <div class="col-md-3">
+                <label for="fecha_desde" class="form-label">Fecha Desde</label>
+                <input type="date" id="fecha_desde" name="fecha_desde" 
+                       value="{{ fecha_desde }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-3">
+                <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+                <input type="date" id="fecha_hasta" name="fecha_hasta" 
+                       value="{{ fecha_hasta }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-3">
+                <label for="metodo_pago" class="form-label">Método de Pago</label>
+                {% if metodos_pago %} 
+                    <select id="metodo_pago" name="metodo_pago" class="form-select form-select-sm">
+                        <option value="">--Seleccionar--</option>
+                        {% for metodo in metodos_pago %}
+                            <option value="{{ metodo.tarjeta_nombre }}" {% if metodo_pago == metodo.tarjeta_nombre %}selected{% endif %}>
+                                {{ metodo.tarjeta_nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <p style="color:red;">⚠ No hay métodos de pago disponibles.</p>
+                {% endif %}
+            </div>
+            <div class="col-12 d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-secondary btn-sm">
+                    <i class="bi bi-funnel"></i> Aplicar Filtros
+                </button>
+
+                <a href="{% url 'CarritoApp:lista_vendedor' %}" class="btn btn-danger btn-sm">
+
+                    <i class="bi bi-x-circle"></i> Quitar Filtros
+                </a>
+
+                <a href="{% url 'CarritoApp:imprimir_caja' %}?dni_cliente={{ dni_cliente }}&fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}&metodo_pago={{ metodo_pago }}" class="btn btn-dark btn-sm" target="_blank">
+                    <i class="bi bi-file-earmark-pdf"></i> Imprimir Caja
+                </a>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de facturas -->
+{% if facturas %}
+<div class="alert alert-info">
+
+<div class="table-responsive shadow-sm rounded bg-light p-3">
+        <table class="table table-striped table-hover align-middle tabla-facturas">
+            <thead class="table-dark">
+                <tr>
+                    <th>N° Factura</th>
+                    <th>Fecha</th>
+                    <th>DNI Cliente</th>
+                    <th>Cliente</th>
+                    <th>Vendedor</th>
+                    <th>Método de Pago</th>
+                    <th>Estado Credito</th>
+                    <th>Nº Tarjeta</th>
+                    <th>Nº de Ticket</th>
+                    <th>Total</th>
+                    <th>Imagen</th>
+                    <th>Entregado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for factura in facturas %}
+                {% ifchanged factura.fecha|date:"Y-m-d" %}
+                <tr class="sep-fecha">
+                    <td colspan="14">{{ factura.fecha|date:"d/m/Y" }}</td>
+                </tr>
+                {% endifchanged %}
+
+                <tr>
+                    <td>{{ factura.numero_factura }}</td>
+                    <td>{{ factura.fecha|date:"d/m/Y" }}</td>
+                    <td>{{ factura.dni_cliente }}</td>
+                    <td>{{ factura.nombre_cliente }} {{ factura.apellido_cliente }}</td>
+                    <td>{{ factura.vendedor }}</td>
+                    <td>
+                        {% if factura.metodo_pago %}
+                            {% if factura.metodo_pago.tarjeta_nombre == "Cuenta Corriente" %}
+                                <span class="text-danger fw-bold">{{ factura.metodo_pago.tarjeta_nombre }}</span>
+                            {% else %}
+                                <span class="text-primary fw-bold">{{ factura.metodo_pago.tarjeta_nombre }}</span>
+                            {% endif %}
+                        {% elif factura.metodo_pago_manual %}
+                            {% if factura.metodo_pago_manual == "Cuenta Corriente" %}
+                                <span class="text-danger fw-bold">{{ factura.metodo_pago_manual }}</span>
+                            {% else %}
+                                <span class="text-success fw-bold">{{ factura.metodo_pago_manual }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Sin especificar</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if factura.metodo_pago_manual == "Cuenta Corriente" %}
+                            {% if factura.estado_credito == "Pagado" %}
+                                <span class="text-success fw-bold">Pagado</span>
+                            {% else %}
+                                <span class="text-danger fw-bold">Pendiente</span>
+                            {% endif %}
+                        {% elif factura.metodo_pago and factura.metodo_pago.tarjeta_nombre == "Cuenta Corriente" %}
+                            {% if factura.estado_credito == "Pagado" %}
+                                <span class="text-success fw-bold">Pagado</span>
+                            {% else %}
+                                <span class="text-danger fw-bold">Pendiente</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-success fw-bold">Pagado</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ factura.tarjeta_numero }}</td>
+                    <td>{{ factura.numero_tiket }}</td>
+                    <td>${{ factura.total_con_interes }}</td>
+                    <td>
+                        {% if factura.imagen_factura %}
+                            <img id="imagen-{{ factura.id }}" src="{{ factura.imagen_factura.url }}" alt="Imagen de Factura" 
+                                class="img-thumbnail" style="max-width: 100px;">
+                        {% else %}
+                            <p class="text-muted">Sin imagen</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'CarritoApp:actualizar_estado_entrega' factura.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <select name="estado" class="form-select form-select-sm d-inline w-auto" onchange="this.form.submit()">
+                                <option value="pendiente" {% if factura.estado_entrega == 'pendiente' %}selected{% endif %}>⏳</option>
+                                <option value="aceptado" {% if factura.estado_entrega == 'aceptado' %}selected{% endif %}>✅</option>
+                                <option value="rechazado" {% if factura.estado_entrega == 'rechazado' %}selected{% endif %}>❌</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-2 justify-content-start">
+                            <a href="{% url 'CarritoApp:detalle_factura' factura.id %}" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-receipt"></i>
+                            </a>
+                            <a href="{% url 'CarritoApp:generar_pdf_factura' factura.id %}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-printer"></i>
+                            </a>
+                            <a href="{% url 'CarritoApp:subir_imagen_factura' factura.id %}" class="btn btn-success btn-sm">
+                                <i class="bi bi-upload"></i>
+                            </a>
+                            {% if factura.imagen_factura %}
+                            <a href="{% url 'CarritoApp:eliminar_imagen_factura' factura.id %}" class="btn btn-danger btn-sm">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                            <button class="btn btn-warning btn-sm btn-modal" data-id="{{ factura.id }}">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+      </table>
+        
+<hr>
+<div class="bg-light p-4 rounded shadow-sm mt-4">
+<!-- Totales por Vendedor -->
+<!-- Totales por Vendedor -->
+            <div class="mb-4">
+                <h6 class="text-primary">Por Vendedor:</h6>
+                <ul class="list-group list-group-flush">
+                    {% for v in totales_por_vendedor %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-start align-items-center">
+                                <span class="me-2">{{ v.vendedor_normalizado|title }}</span>
+                                <span class="fw-bold text-success">${{ v.total|floatformat:2 }}</span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+<!-- Totales por Método de Pago -->
+<div class="mb-4">
+    <h6 class="text-primary">Por Método de Pago:</h6>
+    <ul class="list-group list-group-flush">
+    {% for item in totales_por_metodo %}
+    <li class="list-group-item {% if item.metodo_normalizado == 'cuenta corriente' %}text-danger{% endif %}">
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="d-flex align-items-center">
+                {{ item.metodo_normalizado|title }}
+                <span class="fw-bold ms-2">
+                    ${{ item.total|floatformat:2 }}
+                </span>
+            </span>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+</div>
+
+<!----------CUADROS Totales generales son los  -->
+           <div class="row text-center">
+                <div class="col-md-4 mb-2">
+                    <div class="bg-white p-3 rounded shadow-sm border">
+                        <p class="mb-1 text-muted">Factura Cta COBRADAS</p>
+                        <h5 class="text-success">${{ total_cta_corriente_cobrado|floatformat:2 }}</h5>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-2">
+                    <div class="bg-white p-3 rounded shadow-sm border border-warning">
+                        <p class="mb-1 text-muted fw-semibold">Caja (SIN Cta Cte Facturada)</p>
+                        <h5 class="text-warning">${{ total_en_caja_sin_cta_corriente_facturada|floatformat:2 }}</h5>
+                </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="bg-white p-3 rounded shadow-sm border border-success">
+                        <p class="mb-1 text-muted fw-semibold">Total Gral + Fact Cta Cobrada </p>
+                        <h5 class="text-primary">${{ total_real_con_credito|floatformat:2 }}</h5>
+                    </div>
+                </div>
+            </div>
+    {% else %}
+            <p class="text-center text-muted">No se encontraron facturas con los filtros seleccionados.</p>
+    {% endif %}
+</div>
+
+<!-- Tabla de Cuenta Corriente -->
+<!-- Tabla de Cuenta Corriente -->
+<!-- Tabla de Cuenta Corriente -->
+        <hr>
+        <h6 class="text-success fs-5 mt-4">📋 Pagos Realizados en Cuenta Corriente</h6>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+
+                <tbody>
+                    {% for pago in pagos_cta_corriente %}
+                    <tr>
+                        <td>{{ pago.numero_factura }}</td>
+                        <td>{{ pago.fecha_cuota }}</td>
+                        <td>{{ pago.descripcion }}</td>
+                        <td>${{ pago.imp_cuota_pagadas|floatformat:2 }}</td>
+                        <td>${{ pago.entrega_cta|floatformat:2 }}</td>
+                        <td>
+                            {% if factura.metodo_pago_manual == "Cuenta Corriente" %}
+                                    {% if factura.estado_credito == "Pagado" %}
+                                        <span class="text-success fw-bold">Pagado</span>
+                                    {% else %}
+                                        <span class="text-danger fw-bold">Pendiente</span>
+                                    {% endif %}
+                                {% elif factura.metodo_pago and factura.metodo_pago.tarjeta_nombre == "Cuenta Corriente" %}
+                                    {% if factura.estado_credito == "Pagado" %}
+                                        <span class="text-success fw-bold">Pagado</span>
+                                    {% else %}
+                                        <span class="text-danger fw-bold">Pendiente</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-success fw-bold">Pagado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center text-muted">No hay pagos registrados en cuenta corriente.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <img id="modal-image" src="" alt="Imagen de Factura">
+            </div>
+        </div>
+
+<!-- Script para manejar la ventana modal -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('modal');
+        const modalImage = document.getElementById('modal-image');
+        const closeBtn = document.querySelector('.close');
+
+        // Abrir la ventana modal al hacer clic en un botón
+        document.querySelectorAll('.btn-modal').forEach(boton => {
+            boton.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                const imagen = document.getElementById(`imagen-${id}`);
+                if (imagen) {
+                    modalImage.src = imagen.src;
+                    modal.style.display = 'block';
+                }
+            });
+        });
+
+        // Cerrar la ventana modal
+        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', event => {
+            if (event.target === modal) modal.style.display = 'none';
+        });
+    });
+</script>
+
+{% endblock %}
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

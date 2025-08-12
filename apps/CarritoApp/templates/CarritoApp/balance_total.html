@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block navegacion %}
+    {% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+
+<div class="container my-5">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Stock</th>
+                    <th>Pro/Compr</th>
+                    <th>Pro/Vend</th>
+                    <th>Costo</th>
+                    <th>Venta</th>
+                    <th>Venta-Costo=A</th>
+                    <th>P/Vend*A=Total</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto.nombre_producto }}</td>
+                    <td>{{ producto.stock }}</td>
+                    <td>{{ cantidades_por_producto|get_item:producto.id|default:0 }}</td>
+                    <td>{{ cantidades_vendidas_por_producto|get_item:producto.id|default:0 }}</td>
+                    <td>${{ costos_por_producto|get_item:producto.id|default:0 }}</td>
+                    <td>${{ precios_venta_por_producto|get_item:producto.id|default:0 }}</td>
+                    <td>${{ ganancias_por_producto|get_item:producto.id|default:0 }}</td>
+                    <td>${{ total_caja_por_producto|get_item:producto.id|default:0 }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="7" class="text-end"><strong>Total Caja:</strong></td>
+                    <td><strong>${{ total_caja }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}

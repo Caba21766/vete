@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+    {% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<style>
+.form-container {
+    background-color: #f0f0f0; /* Gris claro */
+    border: 1px solid #ccc; /* Borde sutil */
+    border-radius: 8px; /* Bordes redondeados */
+    max-width: 600px; /* Ancho máximo */
+    margin: auto; /* Centrar en la página */
+    padding: 20px; /* Espaciado interno */
+}
+</style>
+
+<div class="container my-5">
+    <div class="card shadow-sm p-4">
+        <h1 class="text-center mb-4">Agregar Proveedor</h1>
+
+        <!-- Mensajes de éxito -->
+        {% if messages %}
+            <div class="alert alert-info">
+                {% for message in messages %}
+                    <p class="mb-0">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Formulario para agregar/modificar un proveedor -->
+        <div class="form-container p-3 rounded">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="row g-2">
+                    <div class="col-6 col-sm-6">
+                        <input type="text" name="nombre" class="form-control" id="nombre" placeholder="Nombre" value="{{ form.nombre.value|default:'' }}">
+                    </div>
+                    <div class="col-6 col-sm-6">
+                        <input type="text" name="direccion" class="form-control" id="direccion" placeholder="Dirección" value="{{ form.direccion.value|default:'' }}">
+                    </div>
+                    <div class="col-6 col-sm-6">
+                        <input type="text" name="telefono" class="form-control" id="telefono" placeholder="Teléfono" value="{{ form.telefono.value|default:'' }}">
+                    </div>
+                    <div class="col-6 col-sm-6">
+                        <input type="email" name="email" class="form-control" id="email" placeholder="Email" value="{{ form.email.value|default:'' }}">
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                </div>
+            </form>
+        </div>
+</div>
+
+    <hr>
+
+    <!-- Listado de proveedores con botones de modificar y eliminar -->
+    <h2 class="text-center my-4">Proveedores Registrados</h2>
+    {% if provedores %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for provedor in provedores %}
+                    <tr>
+                        <td>{{ provedor.nombre }}</td>
+                        <td>{{ provedor.direccion }}</td>
+                        <td>{{ provedor.telefono }}</td>
+                        <td>{{ provedor.email }}</td>
+                        <td>
+                            <a href="?edit_id={{ provedor.id }}" class="btn btn-secondary btn-sm">Modificar</a>
+                            <a href="?delete_id={{ provedor.id }}" class="btn btn-danger btn-sm" 
+                               onclick="return confirm('¿Estás seguro de eliminar este proveedor?')">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-center text-muted">No hay proveedores registrados.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}

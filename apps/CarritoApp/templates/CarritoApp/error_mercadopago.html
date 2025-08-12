@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container text-center mt-5">
+    <h1 class="text-danger">
+        ❌ Error al generar el enlace de pago
+    </h1>
+    <p class="text-muted">No se pudo generar el enlace de pago.</p>
+
+    {% if error %}
+    <div class="alert alert-danger text-start mt-4" style="max-width: 600px; margin: auto;">
+        <h5><strong>⚠️ Detalle técnico:</strong></h5>
+        <pre style="white-space: pre-wrap;">{{ error }}</pre>
+    </div>
+    {% endif %}
+
+    {% if detalle %}
+    <div class="alert alert-secondary text-start mt-3" style="max-width: 600px; margin: auto;">
+        <h6><strong>Respuesta completa de Mercado Pago:</strong></h6>
+        <pre style="white-space: pre-wrap;">{{ detalle|safe }}</pre>
+    </div>
+    {% endif %}
+
+    <a href="{% url 'CarritoApp:tienda' %}" class="btn btn-primary mt-4">
+        Volver a la tienda
+    </a>
+</div>
+{% endblock %}

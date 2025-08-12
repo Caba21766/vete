@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h4 class="text-center mb-3">Asignar Cuotas - {{ metodo.tarjeta_nombre }}</h4>
+
+    <form method="POST" id="cuotasForm">
+        {% csrf_token %}
+
+        <div id="cuotasContainer" class="mb-2">
+            <div class="row g-2 align-items-center cuota-row mb-2">
+                <div class="col-md-4">
+                    <input type="number" name="cantidad_cuotas[]" class="form-control form-control-sm" placeholder="Cantidad de cuotas" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="number" step="0.01" name="porcentaje_interes[]" class="form-control form-control-sm" placeholder="Interés (%)" required>
+                </div>
+               
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'modulo1:agregar_metodo_pago' %}" class="btn btn-outline-dark btn-sm">Volver</a>
+            <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+        </div>
+    </form>
+
+    <hr class="my-3">
+
+    <h6 class="mb-2">Cuotas Existentes</h6>
+    <table class="table table-sm table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Cuota Nº</th>
+                <th>Interés (%)</th>
+                <th class="text-center">Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cuota in cuotas_existentes %}
+                <tr>
+                    <td>{{ cuota.cantidad_cuotas }}</td>
+                    <td>{{ cuota.porcentaje_interes }}</td>
+                    <td class="text-center">
+                        <form method="POST" action="{% url 'modulo1:eliminar_cuota' cuota.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="3" class="text-center">No hay cuotas cargadas.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.getElementById('agregarCuota').addEventListener('click', function () {
+        const container = document.getElementById('cuotasContainer');
+        const nuevaFila = document.createElement('div');
+        nuevaFila.classList.add('row', 'g-2', 'align-items-center', 'cuota-row', 'mb-2');
+        nuevaFila.innerHTML = `
+            <div class="col-md-4">
+                <input type="number" name="cantidad_cuotas[]" class="form-control form-control-sm" placeholder="Cantidad de cuotas" required>
+            </div>
+            <div class="col-md-4">
+                <input type="number" step="0.01" name="porcentaje_interes[]" class="form-control form-control-sm" placeholder="Interés (%)" required>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger btn-sm btn-remove">Eliminar</button>
+            </div>`;
+        container.appendChild(nuevaFila);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('btn-remove')) {
+            e.target.closest('.cuota-row').remove();
+        }
+    });
+
+    document.getElementById('cuotasForm').addEventListener('submit', function(e) {
+        const cuotas = Array.from(document.querySelectorAll('input[name="cantidad_cuotas[]"]')).map(input => input.value);
+        const tieneDuplicados = new Set(cuotas).size !== cuotas.length;
+        if (tieneDuplicados) {
+            alert("No se pueden repetir cuotas.");
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

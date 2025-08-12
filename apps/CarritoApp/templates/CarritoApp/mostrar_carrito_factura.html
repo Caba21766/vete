@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container my-5 p-4 bg-white shadow rounded">
+    <h1 class="text-end">Factura Nº {{ factura.numero_factura }}</h1>
+    <hr>
+    
+    <div class="row mb-3">
+        <div class="col-md-6"><strong>Fecha:</strong> {{ factura.fecha }}</div>
+        <div class="col-md-6"><strong>Método de Pago:</strong> {{ factura.metodo_pago }}</div>
+    </div>
+    
+    <div class="mb-3"><strong>Cliente:</strong> {{ factura.nombre_cliente }} {{ factura.apellido_cliente }}</div>
+    <div class="mb-3"><strong>DNI Nº:</strong> {{ factura.dni_cliente }}</div>
+    <div class="mb-3"><strong>Vendedor:</strong> {{ factura.vendedor }}</div>
+
+    <h2 class="mt-4">Productos Vendidos:</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>N° Producto</th>
+                    <th>Nombre Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in detalle_productos %}
+                <tr>
+                    <td>{{ producto.numero_producto }}</td>
+                    <td>{{ producto.nombre_producto }}</td>
+                    <td>{{ producto.cantidad_vendida }}</td>
+                    <td>${{ producto.precio_unitario }}</td>
+                    <td>${{ producto.subtotal }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-end fw-bold fs-5">Total Producto: <span class="text-success">${{ factura.total }}</span></p>
+    <p class="text-end fw-bold fs-5">Desc %: <span>${{ factura.descuento }}</span></p>
+    <p class="text-end fw-bold fs-5">Importe c/Descuento: <span class="text-primary">${{ factura.total_descuento }}</span></p>
+    <hr>
+    <p class="text-end fw-bold fs-5">Interés %: <span>{{ factura.interes }}</span></p>
+    <p class="text-end fw-bold fs-5">Cuota Nº: <span>{{ factura.cuotas }}</span></p>
+    <p class="text-end fw-bold fs-5">Cuota Neta: <span class="text-primary">${{ factura.cuota_mensual }}</span></p>
+    <p class="text-end fw-bold fs-5">Total Neto a Pagar: <span class="text-danger">${{ factura.total_con_interes }}</span></p>
+
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <button class="btn btn-dark" onclick="window.print()">Imprimir</button>
+        <button class="btn btn-secondary" onclick="enviarPorCorreo()">Enviar por Correo</button>
+        <button class="btn btn-success" onclick="enviarPorWhatsApp()">Enviar por WhatsApp</button>
+    </div>
+</div>
+
+<script>
+    function enviarPorCorreo() {
+        const email = prompt("Ingrese el correo del destinatario:");
+        if (email) {
+            fetch(`/modulo1/enviar-correo/{{ factura.id }}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(response => response.ok ? alert("Correo enviado exitosamente.") : alert("Error al enviar el correo."))
+            .catch(error => alert("Error al enviar el correo."));
+        }
+    }
+
+    function enviarPorWhatsApp() {
+        const telefono = prompt("Ingrese el número de WhatsApp del destinatario:");
+        if (telefono) {
+            const mensaje = `Factura generada exitosamente. Puede descargar el PDF desde: {{ pdf_url }}`;
+            const whatsappUrl = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<div class="container mt-5 mb-5">
+    <!-- Título con diseño profesional -->
+    <div class="text-center mb-4">
+        <h2 class="text-primary fw-bold">Modificar Compra</h2>
+        <p class="text-muted">Actualiza los datos de tu compra con el formulario a continuación.</p>
+    </div>
+
+    <!-- Formulario Responsive con Diseño Mejorado -->
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6"> <!-- Centrado y adaptado a distintos tamaños de pantalla -->
+            <div class="card shadow-lg rounded-3 border-0">
+                <div class="card-body p-4">
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Mostrar los errores del formulario de manera estilizada -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <strong>Por favor corrige los siguientes errores:</strong>
+                                <ul>
+                                    {% for field in form %}
+                                        {% if field.errors %}
+                                            <li>{{ field.label }}: {{ field.errors|striptags }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <!-- Renderización del Formulario -->
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <!-- Botones de Acción -->
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-check-circle me-2"></i> Guardar Cambios
+                            </button>
+                            <a href="{% url 'CarritoApp:planilla_compra' %}" class="btn btn-secondary px-4">
+                                <i class="bi bi-arrow-left me-2"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

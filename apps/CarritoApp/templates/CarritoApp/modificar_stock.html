@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+    {% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">Modificar Stock</h1>
+    <div class="card mx-auto shadow" style="max-width: 600px;">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="stock" class="form-label">
+                        Nuevo Stock para <strong>{{ producto.nombre_producto }}</strong>
+                    </label>
+                    <input 
+                        type="number" 
+                        name="stock" 
+                        id="stock" 
+                        class="form-control" 
+                        value="{{ producto.stock }}" 
+                        min="0" 
+                        required
+                    >
+                </div>
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+                {% endif %}
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'CarritoApp:modificacion_stock' %}" class="btn btn-secondary">
+                        Volver
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        Actualizar Stock
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
+    <div class="card shadow-lg border-0 rounded" style="max-width: 500px; width: 100%;">
+
+       <!-- Imagen Principal -->
+<div class="p-0 overflow-hidden rounded-top" style="background-color: #f8f9fa;">
+    {% if producto.imagen %}
+        <img src="{{ producto.imagen.url }}" 
+             class="card-img-top img-fluid" 
+             alt="{{ producto.nombre }}" 
+             style="height: 250px; width: 100%; object-fit: contain; background-color: #f8f9fa;">
+    {% else %}
+        <img src="{% static 'img/default-image.jpg' %}" 
+             class="card-img-top img-fluid" 
+             alt="Sin Imagen" 
+             style="height: 250px; width: 100%; object-fit: contain; background-color: #f8f9fa;">
+    {% endif %}
+</div>
+
+
+        <!-- Contenido de la Tarjeta -->
+        <div class="card-body p-4">
+            <h5 class="card-title text-center text-primary fw-bold mb-3">
+                {{ producto.nombre_producto }}
+            </h5>
+            <p class="card-text mb-2"><strong>Descripción:</strong> {{ producto.descripcion }}</p>
+            <p class="card-text mb-2"><strong>Precio:</strong> <span class="text-success fw-bold">${{ producto.precio }}</span></p>
+            <p class="card-text"><strong>Stock:</strong> <span class="text-danger fw-bold">{{ producto.stock }}</span></p>
+        </div>
+
+        <!-- Imágenes Adicionales -->
+        <div class="card-body">
+            <h6 class="text-center text-secondary mb-3">Imágenes Adicionales</h6>
+            <div class="row row-cols-2 g-2 justify-content-center">
+                <!-- Imagen 1 -->
+                <div class="col d-flex justify-content-center">
+                    {% if producto.imagen2 %}
+                        <img src="{{ producto.imagen2.url }}" class="img-thumbnail" alt="Imagen adicional 1" style="height: 150px; width: 100%; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'img/mundo.jpg' %}" class="img-thumbnail" alt="Sin Imagen" style="height: 150px; width: 100%; object-fit: cover;">
+                    {% endif %}
+                </div>
+                <!-- Imagen 2 -->
+                <div class="col d-flex justify-content-center">
+                    {% if producto.imagen3 %}
+                        <img src="{{ producto.imagen3.url }}" class="img-thumbnail" alt="Imagen adicional 2" style="height: 150px; width: 100%; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'img/mundo.jpg' %}" class="img-thumbnail" alt="Sin Imagen" style="height: 150px; width: 100%; object-fit: cover;">
+                    {% endif %}
+                </div>
+                <!-- Imagen 3 -->
+                <div class="col d-flex justify-content-center">
+                    {% if producto.imagen4 %}
+                        <img src="{{ producto.imagen4.url }}" class="img-thumbnail" alt="Imagen adicional 3" style="height: 150px; width: 100%; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'img/mundo.jpg' %}" class="img-thumbnail" alt="Sin Imagen" style="height: 150px; width: 100%; object-fit: cover;">
+                    {% endif %}
+                </div>
+                <!-- Imagen 4 -->
+                <div class="col d-flex justify-content-center">
+                    {% if producto.imagen5 %}
+                        <img src="{{ producto.imagen5.url }}" class="img-thumbnail" alt="Imagen adicional 4" style="height: 150px; width: 100%; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'img/mundo.jpg' %}" class="img-thumbnail" alt="Sin Imagen" style="height: 150px; width: 100%; object-fit: cover;">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Tarjeta del Formulario -->
+<div class="container my-5">
+    <!-- Tarjeta del Formulario -->
+    <div class="card shadow-lg border-0 rounded">
+        <div class="card-header bg-primary text-white text-center">
+            <h5 class="fw-bold mb-0">Realizar Consulta</h5>
+        </div>
+        
+        <!-- Contenido del Formulario -->
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data" class="row g-3">
+                {% csrf_token %}
+                
+                <!-- Campo Oculto -->
+                {% if producto %}
+                    <input type="hidden" name="producto" value="{{ producto.id }}">
+                {% endif %}
+                
+                <!-- Campo de Texto -->
+                <div class="col-12">
+                    <label for="texto" class="form-label fw-bold">Escribir Consulta</label>
+                    <textarea class="form-control" id="texto" name="texto" rows="4" required>{{ opinion.texto }}</textarea>
+                </div>
+                
+                <!-- Botones -->
+                {% if user.is_authenticated %}
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-success px-4">Guardar Cambios</button>
+                    </div>
+                {% else %}
+                    <p class="text-danger text-center">Debe REGISTRASE / INICIAR SESION para EMITIR una Consulta.</p>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    <!-- Tabla de Opiniones -->
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-secondary text-white text-center">
+            <h6 class="mb-0 fw-bold">Consultas Realizadas</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-primary text-center align-middle">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Texto</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for opinion in opiniones %}
+                        <tr>
+                            <td class="align-middle">{{ opinion.usuario.first_name }} {{ opinion.usuario.last_name }}</td>
+
+                            <td class="align-middle">{{ opinion.texto|safe }}</td>
+
+                            <td class="align-middle">{{ opinion.fecha|date:"d M. Y H:i" }}</td>
+                            <td class="align-middle text-center">
+                                {% if user.is_staff %}
+                                    <a href="{% url 'opiniones:modificar_opinion' opinion.id %}" class="btn btn-warning btn-sm">Modificar</a>
+                                {% endif %}
+                                    <a href="{% url 'opiniones:eliminar_opinion' opinion.id %}?next={% url 'opiniones:agregar_opinion' producto_id=opinion.producto.id %}"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('¿ Eliminar Consulta ?');">Eliminar</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No hay Consultas.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

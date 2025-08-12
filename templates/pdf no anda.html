@@ -1,0 +1,85 @@
+
+#------------------vista generar prueba pdf--------------------------------------------------------
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+from io import BytesIO
+from apps.CarritoApp.models import Factura
+from django.shortcuts import render
+import json
+
+def generar_facturaprueba_pdf(request, factura_id, show_buttons=False):
+    try:
+        # Obtener la factura desde la base de datos
+        factura = Factura.objects.get(id=factura_id)
+    except Factura.DoesNotExist:
+        return HttpResponse('Factura no encontrada', status=404)
+
+    # Intentar cargar el detalle de productos desde JSON
+    try:
+        detalle_productos = json.loads(factura.detalle_productos)
+    except json.JSONDecodeError:
+        return HttpResponse("Error en el formato de detalle_productos", status=500)
+
+    # Configurar el buffer y el documento PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    elementos = []
+
+    # Encabezado
+    encabezado = Paragraph(f"Factura Prueba #{factura.id}", styles['Title'])
+    elementos.append(encabezado)
+    elementos.append(Paragraph(f"Cliente: {factura.nombre_cliente} {factura.apellido_cliente}", styles['Normal']))
+    elementos.append(Paragraph(f"DNI: {factura.dni_cliente}", styles['Normal']))
+    elementos.append(Paragraph(f"Fecha: {factura.fecha}", styles['Normal']))
+    elementos.append(Paragraph(f"Método de Pago: {factura.metodo_pago}", styles['Normal']))
+    elementos.append(Paragraph(f"Vendedor: {factura.vendedor}", styles['Normal']))
+    elementos.append(Spacer(1, 20))
+
+    # Tabla de productos
+    data = [["#", "Número de Producto", "Nombre del Producto", "Cantidad", "Precio Unitario", "Subtotal"]]
+    for i, producto in enumerate(detalle_productos, start=1):
+        data.append([
+            i,
+            producto.get('numero_producto', 'N/A'),
+            producto.get('nombre_producto', 'N/A'),
+            producto.get('cantidad_vendida', 'N/A'),
+            f"${producto.get('precio_unitario', 0):.2f}",
+            f"${producto.get('subtotal', 0):.2f}"
+        ])
+
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    ]))
+    elementos.append(table)
+
+    # Total de la factura
+    elementos.append(Spacer(1, 20))
+    elementos.append(Paragraph(f"Total: ${factura.total:.2f}", styles['Normal']))
+    elementos.append(Paragraph(f"Descuento (%): {factura.descuento:.2f}", styles['Normal']))
+    elementos.append(Paragraph(f"Total Gral: ${factura.total_descuento:.2f}", styles['Normal']))
+
+    # Generar el documento PDF
+    doc.build(elementos)
+    buffer.seek(0)
+
+    # Si se solicitan botones, renderizar la plantilla HTML
+    if show_buttons:
+        pdf_url = f"/modulo1/factura/{factura_id}/pdf/"
+        return render(request, 'facturaprueba_pdf.html', {'pdf_url': pdf_url, 'factura_id': factura_id})
+    else:
+        # Devolver el PDF directamente
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="factura_{factura.id}.pdf"'
+        return response
+
+

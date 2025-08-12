@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<div class="container my-5">
+    <h1 class="text-center text-primary mb-4">Consulta de Productos</h1>
+
+    {% if opiniones %}
+        <ul class="list-group">
+            {% for opinion in opiniones %}
+
+                <li class="list-group-item">
+                    <h6 class="text-success fw-bold">Producto: {{ opinion.producto.nombre_producto }}</h6>
+                    <!-- Mostrar el nombre del usuario -->
+                    <p>
+                        <strong>Usuario:</strong> {{ opinion.usuario.first_name }} {{ opinion.usuario.last_name }}
+                    </p>
+                    <!-- Mostrar el texto completo -->
+                    <div style="text-align: justify;">
+                        {{ opinion.texto|safe }}
+                    </div>
+                    <!-- Mostrar la fecha -->
+                    <em class="text-muted">Fecha: {{ opinion.fecha|date:"d M Y" }}</em>
+
+                    <!-- Botones de acción -->
+                    <div class="d-flex justify-content-end align-items-center gap-2 mt-2">
+                        <a href="{% url 'opiniones:opinion_administrador' opinion.id %}" 
+                        class="btn btn-primary btn-sm">Responder</a>
+
+                        <div>
+                            <form method="POST" action="{% url 'opiniones:eliminar_opinion' opinion.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('¿Estás seguro de que deseas eliminar esta opinión?');">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+                
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-warning text-center mt-5" role="alert">
+            No hay Consultas.
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

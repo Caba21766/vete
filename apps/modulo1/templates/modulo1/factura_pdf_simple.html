@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Factura</title>
+    <style>
+        body { font-family: Helvetica; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h2>Factura N° {{ factura.numero_factura }}</h2>
+    <p><strong>Fecha:</strong> {{ factura.fecha }}</p>
+    <p><strong>Cliente:</strong> {{ factura.nombre_cliente }} {{ factura.apellido_cliente }}</p>
+    <p><strong>DNI:</strong> {{ factura.dni_cliente }}</p>
+    <p><strong>Método de Pago:</strong> {{ factura.metodo_pago }}</p>
+    <p><strong>Nº Tarjeta o Ticket:</strong> {{ factura.tarjeta_numero }}</p>
+    
+
+    <h3>Productos</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td>{{ p.nombre_producto }}</td>
+                <td>{{ p.cantidad_vendida }}</td>
+                <td>${{ p.subtotal }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p><strong>Total:</strong> ${{ factura.total }}</p>
+</body>
+</html>

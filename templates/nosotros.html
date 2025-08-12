@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid bg-light py-4">
+  <div class="row mx-auto" style="max-width: 1500px;">
+    
+    <!-- Artículo principal -->
+    <article class="col-lg-8 col-md-7 col-sm-12 mb-4">
+      <h1 class="mb-3" style="font-family: 'Bookman Old Style'; font-size: 32px; color: rgb(47, 47, 61);">
+        Un poco de Historia
+      </h1>
+      <h2 class="mb-3">Veterinaria Mundo Animal</h2>
+      <div class="d-flex gap-3">
+          <!-- Imagen -->
+          <img src="{% static 'img/mundo.jpg' %}" alt="Imagen 1" class="img-fluid" style="width: 120px; height: 150px;">
+          <!-- Texto -->
+          <p>
+              Veterinaria "Mundo Animal" esta desde 2023 . La veterinaria es Caballero Emilse MP 4541...
+              La Innovación, crecimiento con de nuestro estudio es para generar
+              un desarrollo sustentable hacia ofertas de soluciones digitales le permite optimizar el
+              vínculo digital con las demandas, ya sea con el desarrollo de una aplicación móvil,
+              un complejo sistema de gestión o una página web institucional.
+              Nuestro objetivo es que se pueda concentrar en el core de los negocios y nosotros resolvamos
+              los aspectos técnicos para que el mismo funcione de la mejor forma posible.
+          </p>
+      </div>
+      <hr>
+      <div class="d-flex gap-3">
+        <!-- Texto -->
+        <p>
+            Veterinaria "Mundo Animal"  en Tres Isletas Chaco nace en el año 2003 con la propuesta de generar economía del conocimiento...
+            La Innovación, crecimiento con de nuestro estudio es para generar
+            un desarrollo sustentable hacia ofertas de soluciones digitales le permite optimizar el
+            vínculo digital con las demandas, ya sea con el desarrollo de una aplicación móvil,
+            un complejo sistema de gestión o una página web institucional.
+            Nuestro objetivo es que se pueda concentrar en el core de los negocios y nosotros resolvamos
+            los aspectos técnicos para que el mismo funcione de la mejor forma posible.
+        </p>
+        
+    </div>
+  </article>
+  
+
+    <!-- Aside con detalles y mapa -->
+    <aside class="col-lg-4 col-md-5 col-sm-12 bg-warning p-4 rounded">
+      <h2 class="mb-3 text-dark">Estamos en:</h2>
+      <img src="{% static 'img/mundo.jpg' %}" alt="Tres Isletas" style="width: 30%; height: auto;" class="img-fluid mb-3">
+
+      <p><strong>Cuil:</strong> 20-XXXXXXXX-X</p>
+      <p><strong>Domicilio:</strong> Avda Guemes 123, Tres Isletas, Chaco</p>
+      <p><strong>Celular:</strong> +54 9 364 4</p>
+
+      <!-- Mapa responsivo -->
+      <div class="mt-4">
+        <iframe 
+          src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d4252.233999592414!2d-60.43320192051481!3d-26.336589970411737!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2sar!4v1735392038828!5m2!1ses!2sar" 
+          class="w-100" 
+          height="300" 
+          style="border:0;" 
+          allowfullscreen="" 
+          loading="lazy" 
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </aside>
+    
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% include 'footer.html' %}
+{% endblock %}

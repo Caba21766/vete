@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container my-4">
+  <h2 class="mb-4">Seleccione tipo de pago a modificar</h2>
+
+  <div class="d-flex justify-content-between mb-3">
+    <a href="{% url 'CarritoApp:tipo_pago_create' %}" class="btn btn-success">Agregar tipo de pago</a>
+    
+    <form method="post" class="d-flex align-items-center">
+      {% csrf_token %}
+      <select name="accion" class="form-select me-2" required>
+        <option value="">---------</option>
+        <option value="eliminar">Eliminar seleccionados</option>
+        <!-- Otras acciones si las necesitás -->
+      </select>
+      <button type="submit" class="btn btn-primary">Ejecutar</button>
+    </form>
+  </div>
+
+  <table class="table table-bordered text-center align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th scope="col"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+        <th scope="col">Tipo de pago</th>
+        <th scope="col">Alias</th>
+        <th scope="col">CBU</th>
+        <th scope="col">Logo</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tipo in tipos_pago %}
+      <tr>
+        <td><input type="checkbox" name="seleccionados" value="{{ tipo.id }}"></td>
+        <td>{{ tipo.tipo_pago }}</td>
+        <td>{{ tipo.alias }}</td>
+        <td>{{ tipo.cbu }}</td>
+        <td>
+          {% if tipo.tipo_logo %}
+          <img src="{{ tipo.tipo_logo.url }}" width="60" height="60" style="object-fit:cover; border-radius:10%;">
+          {% else %}
+          <span class="text-muted">Sin logo</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="text-muted">{{ tipos_pago|length }} tipo pagos</p>
+</div>
+
+<script>
+  function toggleSelectAll(source) {
+    checkboxes = document.getElementsByName('seleccionados');
+    for (var i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].checked = source.checked;
+    }
+  }
+</script>
+{% endblock %}

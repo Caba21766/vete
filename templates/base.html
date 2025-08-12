@@ -1,0 +1,285 @@
+ 
+{% load static %} 
+{% load permisos_tags %}
+<!DOCTYPE html>
+<html lang="es-ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Caballero Gustavo{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/stile.css' %}">
+
+
+    <!-- Bootstrap CSS desde CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@100&display=swap" rel="stylesheet">
+</head>
+
+<!-- Botón flotante de WhatsApp -->
+<a href="https://wa.me/5493644563925" class="whatsapp-float animated" target="_blank">
+    <img src="{% static 'img/what.png' %}" alt="WhatsApp">
+</a>
+
+<style>
+
+    .fuente-animal {
+        font-family: 'Lobster', cursive;
+        font-size: 22px;
+    }
+
+
+.whatsapp-float {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    z-index: 1000;
+}
+
+.whatsapp-float img {
+    width: 100%;
+    height: auto;
+    border-radius: 50%;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+</style>
+
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="padding-top: 1px; padding-bottom: 1px;">
+
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'index' %}" style="color: white;">
+                <img src="{% static 'img/mundo1.jpg' %}" alt="Logo"
+                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                <span class="fuente-animal" style="font-size: 1.2rem; font-weight: bold;">Mundo Animal</span>
+            </a>
+            <!-- Botón para el menú en pantallas pequeñas -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            
+            <!-- Contenido del menú -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        
+                                            
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="colaboradorDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" style="font-family: 'Verdana', sans-serif; color: #e29494;">
+                            Mis Mascotas
+                            </a>
+
+                            <ul class="dropdown-menu" aria-labelledby="colaboradorDropdown">
+                                <li><a class="dropdown-item" href="{% url 'CarritoApp:mis_facturas' %}">Mis Compras</a></li>
+                                <li><a class="dropdown-item" href="{% url 'libros:listar_ctacorriente' %}">Cuenta Corriente</a></li>
+                                <li><a class="dropdown-item" href="{% url 'mascota:lista_mascotas' %}">Mi Familia</a></li>
+                            </ul>
+                        </li>
+                        
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'nosotros' %}" style="font-weight: bold; color: #75bb93;">Veterinaria</a>
+                    </li
+
+                    
+
+                    <!-- Opciones para colaboradores (solo staff) -->
+                    {% if user.is_staff %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="colaboradorDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" style="color: #9c86d1; font-weight: bold;">
+                            Productos
+                        </a>
+
+                        <ul class="dropdown-menu" aria-labelledby="colaboradorDropdown">
+
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:tipo_pago_list' %}" style="color: #0d3b66; font-weight: bold;">
+                            Tipo Pago Carrito Online</a></li>
+
+                            <li><a class="dropdown-item" href="{% url 'modulo1:agregar_metodo_pago' %}" style="color: #2e7d32; font-weight: bold;">Modo de Pago Factura</a></li>
+
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:agregar_provedor' %}">Proveedores</a></li>
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:agregar_categoria' %}">Categoría</a></li>
+                            <li><a class="dropdown-item fw-bold" href="{% url 'CarritoApp:agregar_producto' %}">Agregar y Editar Producto</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'CarritoApp:agregar_compra' %}" style="font-weight:bold; color:#921606;">
+                                  Agregar Compra
+                                </a>
+                              </li>
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:planilla_compra' %}">Planilla de Compra</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+
+                {% if user.is_staff %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="colaboradorDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Consultas
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="colaboradorDropdown">
+                            <li><a class="dropdown-item" href="{% url 'opiniones:listar' %}">Consutas de Productos</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+
+
+                {% if user.is_staff or user|has_group:"Facturadores" %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="colaboradorDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Listados
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="colaboradorDropdown">
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:listar_facturas' %}">Cierre de Caja</a></li>
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:modificacion_stock' %}">Stock en Deposito</a></li>
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:lista_vendedor' %}">Listado Vendedor</a></li>
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:movimiento_cliente' %}">Listado de Facturas</a></li>
+                            
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:lista_cuenta_corriente' %}">Listado Cuenta Cte</a></li>
+
+                            
+                            <li><a class="dropdown-item" href="{% url 'CarritoApp:productos_vendidos' %}">Productos Vendidos</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+
+                {% if user.is_staff or user|has_group:"Facturadores" %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="colaboradorDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" style="color: #c1c9c2; font-weight: bold;">
+                            Venta
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="colaboradorDropdown">
+                            <li><a class="dropdown-item" href="{% url 'modulo1:prueba' %}" style="color: #2e7d32; font-weight: bold;">Factura</a></li>
+                            <li><a class="dropdown-item" href="{% url 'libros:listar_ctacorriente' %}" style="color: #1c163d; font-weight: bold;">Cuenta Corriente</a></li>
+                            <li><a class="dropdown-item" href="{% url 'backup:listar_respaldos' %}" style="color: #882764; font-weight: bold;">Respaldo</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+
+                
+                </ul>
+
+
+                <!-- Perfil de usuario y autenticación -->
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="dropdown">
+                                {% if user.imagen_usuario %}
+                                <img src="{{ user.imagen_usuario.url }}" alt="Imagen de perfil" width="40" height="40"
+                                    class="rounded-circle me-2">
+                                {% else %}
+                                <img src="{% static 'img/mundo.png' %}" alt="Imagen de perfil por defecto" width="40" height="40"
+                                    class="rounded-circle me-2">
+                                {% endif %}
+                                <span>{{ user.username }}</span>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'apps.blog_auth:editar_usuario' user.pk %}">Modificar Perfil</a></li>
+
+                            {% if user.is_staff %}
+                            <li> <a class="dropdown-item" href="{% url 'blog_auth:lista_usuarios' %}">Listado de Usuarios</a></li>
+                            {% endif %}
+                            
+                            <form method="post" action="{% url 'apps.blog_auth:cerrar_sesion' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item">Cerrar sesión</button>
+                            </form>
+                        </ul>
+                        
+                    </li>
+                    {% else %}
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'apps.blog_auth:iniciar_sesion' %}" style="font-weight: bold; font-size: 18px;">
+                          Iniciar Sesión
+                        </a>
+                      </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% block contenido %}
+     <!-- contenido -->
+    {% endblock %}
+
+
+
+<!-- Pie de página -->
+<!-- Pie de página -->
+<footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row text-center text-md-start">
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                    <h4>Mis redes</h4>
+                    <a href="https://www.Facebook.com/" target="_blank" class="me-2">
+                        <i class="bi bi-facebook fs-3 text-white"></i>
+                    </a>
+                    <a href="https://twitter.com/" target="_blank">
+                        <i class="bi bi-twitter fs-3 text-white"></i>
+                    </a>
+                    <a href="https://twitter.com/" target="_blank">
+                        <i class="bi bi-google fs-3 text-white"></i>
+                    </a>
+                    <a href="https://twitter.com/" target="_blank">
+                        <i class="bi bi-instagram fs-3 text-white"></i>
+                    </a>
+                </div>
+                <div class="col-12 col-md-6">
+                    <h4>Contáctame</h4>
+                    <p>Mail: neagestion@gmail.com</p>
+                    <p>Cel: 3644-563925</p>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-4">
+                <p class="mb-0 ms-3">&copy; Copyright 2024 - Gustavo Caballero</p>
+                
+                <div class="d-flex align-items-center me-3">
+                    <img src="{% static 'img/escudoinfor.png' %}" alt="Logo" 
+                         style="width: 40px; height: 40px; border-radius: 10%; object-fit: cover;">
+                    <span class="ms-2">Instituto de Informática</span>
+                </div>
+            </div>
+            
+            
+        </div>
+</footer>
+
+    <!-- Cargar Bootstrap JS y otros scripts necesarios -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+</body>
+
+</html>

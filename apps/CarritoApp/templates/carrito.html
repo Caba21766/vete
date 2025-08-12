@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<body class="bg-light">
+    <div class="container my-5">
+        <!-- Información de la factura -->
+        <div class="card mb-4 shadow-sm border-0">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <!-- Logo -->
+                    <div class="col-md-3 text-center mb-3 mb-md-0">
+                        <img src="{% static 'img/mundo1.jpg' %}" alt="Logo" 
+                            style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                    </div>
+
+                    <!-- Título y datos -->
+                    <div class="col-md-9">
+                        <h1 class="text-success fw-bold mb-2">Veterinaria Hola Mundo</h1>
+                        <hr style="margin-top: 0.2rem; margin-bottom: 1rem; border-color: #ccc;">
+                        <p class="mb-1" style="font-size: 1.4rem; font-weight: bold;">
+                            <strong>Factura:</strong> <span class="text-dark">{{ numero_factura }}</span>
+                        </p>
+                        <p class="mb-1"><strong>Fecha:</strong> <span class="text-dark">{{ fecha }}</span></p>
+                        <p class="mb-0"><strong>Cliente:</strong> <span class="text-dark">{{ nombre_usuario }} {{ apellido_usuario }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advertencia de registro -->
+        {% if usuario_no_registrado %}
+        <div class="alert alert-warning text-center">
+            <strong>¡Advertencia!</strong> Debes registrarte para generar una factura.
+        </div>
+        {% endif %}
+
+        <!-- Tabla del carrito -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
+                        <th>Importe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in carrito.items %}
+                    <tr>
+                        <td>{{ value.nombre }}</td>
+                        <td>{{ value.cantidad }}</td>
+                        <td>${{ value.precio }}</td>
+                        <td>
+                            <a href="{% url 'CarritoApp:sumar_producto' key %}" class="btn btn-success btn-sm me-1">+</a>
+                            <a href="{% url 'CarritoApp:Sub' key %}" class="btn btn-danger btn-sm">-</a>
+                        </td>
+                        <td>${{ value.importe }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Total y botones -->
+        <div class="text-end mb-4">
+            <h4 class="fw-bold" style="color: #5a1f18; font-weight: 900;">
+                Total: ${{ total_carrito }}
+            </h4>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
+            <a href="{% url 'CarritoApp:limpiar_carrito' %}" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Limpiar Carrito
+            </a>
+            <a href="{% url 'CarritoApp:tienda' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a la Tienda
+            </a>
+            <button type="button" class="btn btn-success" onclick="verificarCarrito()">
+                <i class="bi bi-save"></i> Pagar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Método de Pago -->
+    <div class="modal fade" id="metodoPagoModal" tabindex="-1" aria-labelledby="metodoPagoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="metodoPagoModalLabel" style="color: #2e7d32; font-weight: bold;">Seleccione Pago</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <form id="formulario_pago" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- 🛡 Cuadro de seguridad compacto -->
+                    <div class="alert alert-success p-2 small" role="alert" style="line-height: 1.2;">
+                        <strong class="text-success">🔒 PAGO SEGURO</strong><br>
+                        Nosotros nunca le estaremos solicitando información de cuentas o pagos por fuera de esta plataforma.
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="row g-2">
+                            {% for tipo in tipos_pago %}
+                            <div class="col-md-12 border p-2 rounded d-flex justify-content-between align-items-center" style="line-height: 1.2; font-size: 0.9rem;">
+                                <div>
+                                    <input type="radio" name="metodo_pago" value="{{ tipo.id }}" class="form-check-input me-2" required>
+                                    
+                                    <strong>{{ tipo.tipo_pago }}</strong><br>
+                                    {% if tipo.alias %}<div>Alias: <strong>{{ tipo.alias }}</strong></div>{% endif %}
+                                    {% if tipo.cbu %}<div>CBU: <strong>{{ tipo.cbu }}</strong></div>{% endif %}
+                                </div>
+                                {% if tipo.tipo_logo %}
+                                    <img src="{{ tipo.tipo_logo.url }}" alt="Logo {{ tipo.tipo_pago }}" style="width: 50px; height: 50px; object-fit: contain;">
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Separador -->
+                    <hr class="my-3">
+
+                    <!-- Botón de Mercado Pago -->
+                    <div class="text-center mt-3">
+                    <a href="{% url 'CarritoApp:mp_checkout' %}">
+                        <img src="{% static 'img/mercadopago.webp' %}" 
+                            alt="Pagar con Mercado Pago" 
+                            style="width: 200px; height: auto; cursor: pointer;">
+                    </a>
+                </div>
+
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="procesarPago()">Pagar</button>
+                </div>
+            </form>
+
+            </div>
+        </div>
+    </div>
+
+
+<!-- Modal de Confirmación -->
+<script>
+        function verificarCarrito() {
+            const total = parseFloat("{{ total_carrito|default:'0'|safe }}");
+            const cantidadProductos = parseInt("{{ carrito|length|default:'0'|safe }}");
+            if (cantidadProductos === 0 || total === 0) {
+                alert("No puedes generar una factura porque el carrito está vacío.");
+            } else {
+                // Mostrar el modal si hay productos
+                var modal = new bootstrap.Modal(document.getElementById('metodoPagoModal'));
+                modal.show();
+            }
+        }
+</script>
+
+
+<script>
+    function procesarPago() {
+        // Buscar el método de pago seleccionado (radio button)
+        const metodoSeleccionado = document.querySelector('input[name="metodo_pago"]:checked');
+        
+        if (!metodoSeleccionado) {
+            alert("Por favor selecciona un método de pago.");
+            return;
+        }
+    
+        const metodo = metodoSeleccionado.value;
+        document.getElementById("tipo_pago_resumen").textContent = metodo;
+    
+        const modalTicket = new bootstrap.Modal(document.getElementById('creditoModal'));
+        modalTicket.show();
+    }
+</script>
+    
+<div class="modal fade" id="creditoModal" tabindex="-1" aria-labelledby="creditoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content shadow">
+        <div class="modal-header bg-light border-bottom">
+          <h5 class="modal-title text-dark" id="creditoModalLabel" style="color: #514c66; font-weight: bold;">Registrar Ticket</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Campo para ingresar el ticket -->
+          <div class="mb-3">
+            
+            <input type="text" class="form-control" id="numero_tiket" name="numero_tiket" placeholder="Ej: 123456" required>
+          </div>
+  
+          <!-- Resumen del método -->
+          <p class="mt-3 fw-bold text-success">Usted ha pagado con: <span id="tipo_pago_resumen"></span></p>
+  
+          <!-- Botón para guardar -->
+          <button type="button" class="btn btn-primary w-100" onclick="enviarFormularioConTicket()">Finalizar Pago</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function enviarFormularioConTicket() {
+    const form = document.getElementById("formulario_pago");
+
+    const ticketInput = document.createElement("input");
+    ticketInput.type = "hidden";
+    ticketInput.name = "numero_tiket";
+    ticketInput.value = document.getElementById("numero_tiket").value;
+    form.appendChild(ticketInput);
+
+    // ✅ Eliminar esta línea para que use la pestaña actual
+    // form.target = "_blank";
+
+    form.action = "/CarritoApp/guardar_efectivo/";  // asegurate que este path coincida con tus urls
+    form.submit();
+}
+</script>
+<!-- Bootstrap Bundle con Popper incluido (NECESARIO para dropdowns) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<div class="container my-4">
+  <h2 class="mb-3">Agregar nuevo tipo de pago</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a href="{% url 'CarritoApp:tipo_pago_list' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

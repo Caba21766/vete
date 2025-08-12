@@ -1,0 +1,757 @@
+
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+<h1>Pago Crédito de {{ cuenta_corriente.id }} - Factura Nº {{ factura.numero_factura }}</h1>
+    <hr>
+    <div style="display: flex; justify-content: space-between; gap: 20px; background-color: #f4f4f4; padding: 15px; border-radius: 8px; flex-wrap: wrap;">
+        <!-- Columna 1 -->
+        <div style="flex: 1; min-width: 250px;">
+            <p><strong>Factura Nº:</strong> {{ factura.numero_factura }}</p>
+            <p><strong>Fecha:</strong> {{ factura.fecha }}</p>
+            <p><strong>Cliente:</strong> {{ factura.nombre_cliente }} {{ factura.apellido_cliente }}</p>
+            <p><strong>DNI Cliente:</strong> {{ factura.dni_cliente }}</p>
+        </div>
+        <!-- Columna 2 -->
+        <div style="flex: 1; min-width: 250px;">
+            <p><strong>Total con Interés:</strong> <span style="color: green; font-weight: bold; font-size: 18px;">${{ factura.total_con_interes }}</span></p> 
+            <p><strong>Valor Cuota Mensual:</strong><span style="color: rgb(43, 65, 161); font-weight: bold; font-size: 18px;">$ {{ factura.cuota_mensual }}</p>
+            
+            <p><strong>Pago a la Fecha:</strong> <span style="color: rgb(8, 80, 40); font-weight: bold; font-size: 18px;">${{ total_pagos }}</span></p>
+            <p><strong>Total Deuda:</strong> <span style="color: red; font-weight: bold; font-size: 18px;">${{ total_deuda }}</span></p>
+        </div>
+        <!-- Columna 3 -->
+        <div style="flex: 1; min-width: 250px;">
+            <p><strong>Cantidad de Cuotas:</strong> {{ factura.cuotas }}</p>
+            <p><strong>Cuotas Pagadas:</strong> {{ total_cuotas_pagadas }}</p>
+            <p><strong>Cuotas Restantes:</strong> {{ cuotas_restantes }}</p>
+        </div>
+    </div>
+    <hr> 
+{% if mensaje %}
+        <p style="color: green; font-weight: bold;">{{ mensaje }}</p>
+{% endif %}
+<hr>
+<!---------------------------- Formulario Pagar Cuota ------------------------------->
+<!---------------------------- Formulario Pagar Cuota ------------------------------->
+<!---------------------------- Formulario Pagar Cuota ------------------------------->
+{% if user.is_staff %}
+
+<h2>Seleccione el tipo de pago</h2> 
+<form method="POST" action="{% url 'libros:pago_credito' factura.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="tipo_pago" value="cuota">
+    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
+        <label for="cantidad_cuotas"><strong>Cuotas:</strong></label>
+        <input type="number" id="cantidad_cuotas" name="cantidad_cuotas" min="1" value="1" required>
+
+        <label for="metodo_pago"><strong>Pago:</strong></label>
+        <select name="metodo_pago" id="metodo_pago_cuota" required style="min-width: 160px;">
+            <option value="" disabled selected>Seleccione Pago</option>
+            <option value="Efectivo">Efectivo</option>
+            {% for metodo in metodos_pago %}
+                <option value="{{ metodo.id }}">{{ metodo.tarjeta_nombre }}</option>
+            {% endfor %}
+        </select>
+        <strong>Total:</strong> 
+        <span id="total_a_pagar" style="color: green; font-weight: bold;">${{ factura.cuota_mensual }}</span>
+
+        <!-- Botón que solo aparece si se selecciona "Efectivo" -->
+        <button type="button" id="boton_registrar_pago" class="btn btn-success" style="display: none;">
+            Registrar Pago
+        </button>
+
+        <!-- Inputs ocultos -->
+        <input type="hidden" id="monto_pagado_input" name="monto_pagado" value="{{ factura.cuota_mensual }}">
+        <input type="hidden" id="imp_cuota_pagadas_input" name="imp_cuota_pagadas" value="{{ factura.cuota_mensual }}">
+    </div>
+
+    <!-- Modal para CUOTA ---- Cuenta tarjeta -->
+    <div class="modal fade" id="creditoModal" tabindex="-1" aria-labelledby="creditoModalLabel" aria-hidden="true">
+
+        <div class="modal-dialog">
+            <div class="modal-content shadow">
+              <div class="modal-header bg-light border-bottom">
+                <h5 class="modal-title" id="creditoModalLabel" style="color: #0b2c4e; font-weight: bold;">Registrar Cuota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
+              <div class="alert alert-info" id="metodo_pago_seleccionado_credito">
+                Método de pago seleccionado: <strong id="texto_metodo_pago_credito">-</strong>
+              </div>
+              <div class="modal-body">
+                <div id="creditoForm">
+          
+                  <!-- Número de tarjeta -->
+                  <div class="mb-3">
+                    <label for="tarjeta_numero_credito" class="form-label text-danger fw-semibold">Número Tarjeta:</label>
+                    <input type="text" id="tarjeta_numero_credito" name="tarjeta_numero" class="form-control" maxlength="16" placeholder="Ingrese número de tarjeta">
+                  </div>
+          
+                  <!-- Factura ID -->
+                  <input type="hidden" id="modal-factura-id" name="factura_id" value="{{ factura.id }}">
+          
+                  <!-- Suma -->
+                  <div class="mb-2">
+                    <label class="form-label fw-semibold">Suma: <span id="suma" data-suma="{{ factura.cuota_mensual }}" class="text-success">${{ factura.cuota_mensual }}</span></label>
+                    <input type="hidden" id="suma_input" name="imp_cuota_pagadas" value="{{ factura.cuota_mensual }}">
+                  </div>
+          
+                  <!-- Interés -->
+                  <div class="mb-3">
+                    <label for="interes" class="form-label text-primary fw-semibold">Interés (%)</label>
+                    <input type="number" id="interes" name="interes" step="0.01" class="form-control" required oninput="calcularInteres()">
+                  </div>
+          
+                  <!-- Interés calculado -->
+                  <div class="mb-2">
+                    <label class="form-label">Suma * Int / 100: <span id="interesCalculado" class="text-muted">$0.00</span></label>
+                    <input type="hidden" id="interes_aplicado" name="interes_aplicado">
+                  </div>
+          
+                  <!-- Total con interés -->
+                  <div class="mb-2">
+                    <label class="form-label">Suma + Interés: <span id="sumaMasInteres" class="text-success">$0.00</span></label>
+                    <input type="hidden" id="totalConInteres" name="total_con_interes">
+                  </div>
+          
+                  <!-- Cantidad de cuotas -->
+                  <div class="mb-3">
+                    <label for="cuotas" class="form-label text-primary fw-semibold">Cantidad de Cuotas</label>
+                    <input type="number" id="cuotas" name="cuotas" min="1" class="form-control" required oninput="calcularCuotaMensual()">
+                  </div>
+          
+                  <!-- Cuota mensual -->
+                  <div class="mb-3">
+                    <label class="form-label">Cuota Mensual: <span id="cuotaMensual" class="text-success">$0.00</span></label>
+                  </div>
+          
+                  <hr>
+          
+                  <!-- Botón -->
+                  <div class="text-end">
+                    <button type="button" id="guardarCredito" class="btn btn-primary w-100">Guardar Cuota</button>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+</form>
+<hr>
+
+<!---------------------------- script del metodo pago-------------------------->
+<!---------------------------- script del metodo pago-------------------------->
+<!---------------------------- script del metodo pago-------------------------->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const metodoPagoSelect = document.getElementById("metodo_pago_cuota");
+        const botonRegistrarPago = document.getElementById("boton_registrar_pago");
+
+        if (metodoPagoSelect && botonRegistrarPago) {
+            metodoPagoSelect.addEventListener("change", function () {
+                const seleccion = this.value;
+
+                if (seleccion === "Efectivo") {
+                    // ✅ Mostrar botón si es efectivo
+                    botonRegistrarPago.style.display = "inline-block";
+                } else {
+                    // ❌ Ocultar botón si es tarjeta o billetera
+                    botonRegistrarPago.style.display = "none";
+
+                    // Abrir el modal
+                    const modal = new bootstrap.Modal(document.getElementById("creditoModal"));
+                    const textoMetodo = metodoPagoSelect.options[metodoPagoSelect.selectedIndex].text;
+                    document.getElementById("texto_metodo_pago_credito").textContent = textoMetodo;
+                    modal.show();
+                }
+            });
+        }
+    });
+
+    function calcularInteres() {
+        const sumaSpan = document.getElementById("suma");
+        const interesInput = document.getElementById("interes");
+        const interesCalculadoSpan = document.getElementById("interesCalculado");
+        const sumaMasInteresSpan = document.getElementById("sumaMasInteres");
+
+        // Tomar el valor de "suma" desde el atributo data-suma
+        const suma = parseFloat(sumaSpan.getAttribute("data-suma")) || 0;
+        const interes = parseFloat(interesInput.value) || 0;
+
+        const interesCalculado = (suma * interes) / 100;
+        const sumaMasInteres = suma + interesCalculado;
+
+        interesCalculadoSpan.textContent = interesCalculado.toFixed(2);
+        sumaMasInteresSpan.textContent = sumaMasInteres.toFixed(2);
+
+        // ✅ Guardamos el interés calculado en el input oculto
+        document.getElementById("interes_aplicado").value = interesCalculado.toFixed(2);
+    }
+    function calcularCuotaMensual() {
+        const sumaMasInteresSpan = document.getElementById("sumaMasInteres");
+        const cuotasInput = document.getElementById("cuotas");
+        const cuotaMensualSpan = document.getElementById("cuotaMensual");
+        const totalConInteresInput = document.getElementById("totalConInteres");
+
+        const totalConInteres = parseFloat(sumaMasInteresSpan.textContent) || 0;
+        const cantidadCuotas = parseInt(cuotasInput.value) || 1;
+
+        const cuotaMensual = totalConInteres / cantidadCuotas;
+
+        cuotaMensualSpan.textContent = cuotaMensual.toFixed(2);
+        totalConInteresInput.value = totalConInteres.toFixed(2);  // Lo guardamos para el backend
+    }
+
+    // actualizar el input oculto cuando se muestre o cambie "suma"
+    document.addEventListener("DOMContentLoaded", function () {
+    const sumaSpan = document.getElementById("suma");
+    const sumaInput = document.getElementById("suma_input");
+
+    if (sumaSpan && sumaInput) {
+        sumaInput.value = sumaSpan.getAttribute("data-suma") || sumaSpan.textContent;
+    }
+});
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const inputCantidad = document.getElementById("cantidad_cuotas");  // este lo agregás en el input
+        const inputMontoPagado = document.getElementById("monto_pagado_input");
+        const inputImpCuotaPagadas = document.getElementById("imp_cuota_pagadas_input");
+        const spanTotal = document.getElementById("total_a_pagar");
+    
+        const cuotaMensual = parseFloat("{{ factura.cuota_mensual|floatformat:'2'|default:'0' }}".replace(",", ".")) || 0;
+    
+        if (inputCantidad) {
+            inputCantidad.addEventListener("input", function () {
+                const cantidad = parseInt(this.value) || 1;
+                const total = (cantidad * cuotaMensual).toFixed(2);
+    
+                if (inputMontoPagado) inputMontoPagado.value = total;
+                if (inputImpCuotaPagadas) inputImpCuotaPagadas.value = total;
+                if (spanTotal) spanTotal.textContent = `$${total}`;
+            });
+        }
+    });
+    </script>
+    
+
+
+<!------------------------------------("guardarCredito")---------------------->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const guardarCreditoBtn = document.getElementById("guardarCredito");
+
+    if (guardarCreditoBtn) {
+        guardarCreditoBtn.addEventListener("click", function () {
+            const facturaId = document.getElementById("modal-factura-id").value;
+            const metodoPago = document.getElementById("metodo_pago_cuota").value;
+            const montoPagado = parseFloat(document.querySelector("input[name='monto_pagado']").value) || 0;
+            const tarjetaNumero = document.getElementById("tarjeta_numero_credito").value;
+            const interes = parseFloat(document.getElementById("interes").value) || 0;
+            const cuotas = parseInt(document.getElementById("cuotas").value) || 1;
+            const impCuotaPagadas = parseFloat(document.getElementById("suma_input").value) || 0;
+            const interesAplicado = parseFloat(document.getElementById("interes_aplicado").value) || 0;
+            const totalConInteres = parseFloat(document.getElementById("totalConInteres").value) || 0;
+
+            // ✅ Obtenemos los valores desde el backend (como texto) y los limpiamos
+            const totalPagadoHastaAhora = parseFloat("{{ total_pagos|floatformat:'2'|default:'0' }}".replace(",", ".")) || 0;
+            const totalFactura = parseFloat("{{ factura.total_con_interes|floatformat:'2'|default:'0' }}".replace(",", ".")) || 0;
+
+            if ((totalPagadoHastaAhora + montoPagado) > totalFactura) {
+                alert("⚠️ El monto ingresado supera la deuda restante. No se puede guardar.");
+                return; // 🚫 no sigue con el fetch
+            }
+
+            fetch(`/libros/factura/${facturaId}/pago_credito/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    tipo_pago: "cuota",
+                    metodo_pago: metodoPago,
+                    monto_pagado: montoPagado,
+                    tarjeta_numero: tarjetaNumero,
+                    interes: interes,
+                    cuotas: cuotas,
+                    imp_cuota_pagadas: impCuotaPagadas,
+                    interes_aplicado: interesAplicado,
+                    total_con_interes: totalConInteres,
+                    cantidad_cuotas: document.getElementById("cantidad_cuotas").value,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("✅ Cuota registrada correctamente.");
+                    window.open(`/libros/generar_pdf_credito/${facturaId}/`, '_blank');
+                    setTimeout(() => {
+                        window.location.href = `/libros/factura/${facturaId}/pago_credito/`;
+                    }, 1500);
+                } else {
+                    alert("⚠️ Error: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    }
+});
+    
+</script>
+    
+<!---------------------------- viene del boton oculto-------------------------->
+<!---------------------------- viene del boton oculto-------------------------->    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const botonRegistrarPago = document.getElementById("boton_registrar_pago");
+    
+        if (botonRegistrarPago) {
+            botonRegistrarPago.addEventListener("click", function () {
+                const facturaId = document.getElementById("modal-factura-id").value;
+                const tipoPago = document.querySelector("input[name='tipo_pago']").value;
+                const metodoPago = document.getElementById("metodo_pago_cuota").value;
+                const montoPagado = parseFloat(document.querySelector("input[name='monto_pagado']").value) || 0;
+                const impCuotaPagadas = parseFloat(document.getElementById("imp_cuota_pagadas_input").value) || 0;
+    
+                fetch(`/libros/factura/${facturaId}/pago_credito/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({
+                        tipo_pago: tipoPago,
+                        metodo_pago: metodoPago,
+                        monto_pagado: montoPagado,
+                        imp_cuota_pagadas: impCuotaPagadas,
+                        cantidad_cuotas: document.getElementById("cantidad_cuotas").value,
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                if (data.success) {
+                    alert("✅ Pago en efectivo registrado.");
+
+                    // Abrir el PDF en una pestaña nueva
+                    window.open(`/libros/generar_pdf_credito/${facturaId}/`, '_blank');
+
+                    // Volver automáticamente a la pantalla de pago
+                    setTimeout(() => {
+                        window.location.href = `/libros/factura/${facturaId}/pago_credito/`;
+                    }, 1500); // Espera 1.5 segundos para que el PDF se cargue
+                } else {
+                    alert("⚠️ Error al registrar el pago: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+
+            });
+        }
+    });
+    </script>
+<!---------------------------- Fin Cuota ------------------------------->
+<!---------------------------- Fin Cuota ------------------------------->
+<!---------------------------- Fin Cuota ------------------------------->
+
+
+
+
+
+
+<!---------------- Formulario Entrega ------------------------------>
+<!---------------- Formulario Entrega ------------------------------>
+<!---------------- Formulario Entrega ------------------------------>
+<form method="POST" action="{% url 'libros:pago_credito' factura.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="tipo_pago" value="entrega">
+
+    <label for="monto_entregado"><strong>Entrega:$</strong></label>
+    <input type="number" name="monto_entregado" id="monto_entregado" step="0.01" min="0" required>
+
+    <label for="metodo_pago_entrega"><strong>Pago:</strong></label>
+    <select name="metodo_pago" id="metodo_pago_entrega" required>
+        <option value="" disabled selected>Seleccione Pago</option>
+        <option value="Efectivo">Efectivo</option>
+        {% for metodo in metodos_pago %}
+            <option value="{{ metodo.id }}">{{ metodo.tarjeta_nombre }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Botón para efectivo -->
+    <button type="button" id="boton_registrar_entrega" class="btn btn-success mt-3" style="display: none;">
+        Registrar Entrega
+        <input type="hidden" id="entrega_cta_input" name="entrega_cta" value="">
+    </button>
+
+    <!-- Modal exclusivo para entrega PAGO Tarjeta -->
+    <div class="modal fade" id="entregaModal" tabindex="-1" aria-labelledby="entregaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="entregaModalLabel" style="color: #0b2c4e; font-weight: bold;">Registrar Entrega</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="alert alert-info" id="metodo_pago_seleccionado_entrega">
+                    Método de pago seleccionado: <strong id="texto_metodo_pago_entrega">-</strong>
+                </div>
+
+                <div class="modal-body">
+                    <div id="entregaForm">
+                  
+                      <!-- Número de tarjeta -->
+                      <div class="mb-3">
+                        <label for="tarjeta_numero_entrega" class="form-label text-danger fw-semibold">Número Tarjeta:</label>
+                        <input type="text" id="tarjeta_numero_entrega" name="tarjeta_numero" class="form-control" maxlength="16" placeholder="Ingrese número de tarjeta">
+                      </div>
+                  
+                      <!-- Datos ocultos -->
+                      <input type="hidden" id="modal-factura-id-entrega" name="factura_id" value="{{ factura.id }}">
+                      <input type="hidden" id="suma_entrega" name="entrega_cta" value="">
+                  
+                      <!-- Interés -->
+                      <div class="mb-3">
+                        <label for="interes_entrega" class="form-label text-primary fw-semibold">Interés (%)</label>
+                        <input type="number" id="interes_entrega" name="interes" step="0.01" class="form-control" required oninput="calcularInteresEntrega()">
+                      </div>
+                  
+                      <!-- Interés calculado -->
+                      <div class="mb-2">
+                        <label class="form-label">Suma * Int / 100: <span id="interes_entrega_resultado" class="text-muted">$0.00</span></label>
+                        <input type="hidden" id="interes_aplicado_entrega" name="interes_aplicado">
+                      </div>
+                  
+                      <!-- Total con interés -->
+                      <div class="mb-2">
+                        <label class="form-label">Total con Interés: <span id="total_entrega" class="text-success">$0.00</span></label>
+                        <input type="hidden" id="total_con_interes_entrega" name="total_con_interes">
+                      </div>
+                  
+                      <!-- Cantidad de cuotas -->
+                      <div class="mb-3">
+                        <label for="cuotas_entrega" class="form-label text-primary fw-semibold">Cantidad de Cuotas</label>
+                        <input type="number" id="cuotas_entrega" name="cuotas" min="1" class="form-control" required oninput="calcularCuotaEntrega()">
+                      </div>
+                  
+                      <!-- Cuota mensual -->
+                      <div class="mb-3">
+                        <label class="form-label">Cuota Mensual: <span id="cuota_mensual_entrega" class="text-success">$0.00</span></label>
+                      </div>
+                  
+                      <hr>
+                 
+                      <!-- Botón -->
+                      <div class="text-end">
+                        <button type="button" id="guardarEntrega" class="btn btn-primary w-100">Guardar Entrega</button>
+                      </div>
+                  
+                    </div>
+                  </div>
+                  
+
+            </div>
+        </div>
+    </div>
+</form>
+
+<!---------------- script del metodo pago-------------------------->
+<!---------------- script del metodo pago-------------------------->    
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const metodoEntregaSelect = document.getElementById("metodo_pago_entrega");
+        const botonEntrega = document.getElementById("boton_registrar_entrega");
+        const entregaModal = new bootstrap.Modal(document.getElementById("entregaModal"));
+        const montoInput = document.getElementById("monto_entregado");
+        const entregaInput = document.getElementById("entrega_cta_input");
+    
+        metodoEntregaSelect.addEventListener("change", function () {
+            const seleccion = this.options[this.selectedIndex].text;
+    
+            entregaInput.value = montoInput.value;
+    
+            if (this.value === "Efectivo") {
+                botonEntrega.style.display = "inline-block";
+            } else {
+                botonEntrega.style.display = "none";
+                document.getElementById("suma_entrega").value = montoInput.value;
+                document.getElementById("interes_aplicado_entrega").value = "";
+                document.getElementById("total_con_interes_entrega").value = "";
+                // Mostramos texto del método
+                const textoMetodoEntrega = metodoEntregaSelect.options[metodoEntregaSelect.selectedIndex].text;
+                document.getElementById("texto_metodo_pago_entrega").textContent = textoMetodoEntrega;
+                entregaModal.show();
+            }
+        });
+    
+        montoInput.addEventListener("input", () => {
+            entregaInput.value = montoInput.value;
+        });
+    });
+    </script>
+
+<!---------------- script del metodo pago-------------------------->
+<!---------------- script del metodo pago-------------------------->    
+<script>
+    function calcularInteresEntrega() {
+        const monto = parseFloat(document.getElementById("suma_entrega").value) || 0;
+        const interes = parseFloat(document.getElementById("interes_entrega").value) || 0;
+        const interesCalculado = (monto * interes) / 100;
+        const total = monto + interesCalculado;
+    
+        document.getElementById("interes_entrega_resultado").textContent = interesCalculado.toFixed(2);
+        document.getElementById("interes_aplicado_entrega").value = interesCalculado.toFixed(2);
+        document.getElementById("total_entrega").textContent = total.toFixed(2);
+        document.getElementById("total_con_interes_entrega").value = total.toFixed(2);
+    
+        calcularCuotaEntrega();
+    }
+    
+    function calcularCuotaEntrega() {
+        const total = parseFloat(document.getElementById("total_con_interes_entrega").value) || 0;
+        const cuotas = parseInt(document.getElementById("cuotas_entrega").value) || 1;
+        const cuota = total / cuotas;
+        document.getElementById("cuota_mensual_entrega").textContent = cuota.toFixed(2);
+    }
+    </script>
+
+<!---------------- script del metodo pago-------------------------->
+<!---------------- script del metodo pago-------------------------->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const guardarBtn = document.getElementById("guardarEntrega");
+
+        guardarBtn.addEventListener("click", function () {
+            const facturaId = document.getElementById("modal-factura-id-entrega").value;
+            const tipoPago = "entrega";
+            const metodoPago = document.getElementById("metodo_pago_entrega").value;
+            const monto = parseFloat(document.getElementById("suma_entrega").value) || 0;
+            const interes = parseFloat(document.getElementById("interes_entrega").value) || 0;
+            const cuotas = parseInt(document.getElementById("cuotas_entrega").value) || 1;
+            const tarjetaNumero = document.getElementById("tarjeta_numero_entrega").value;
+            const interesAplicado = document.getElementById("interes_aplicado_entrega").value;
+            const totalConInteres = document.getElementById("total_con_interes_entrega").value;
+
+            // ✅ Traer valores desde el backend para validar
+            const totalPagadoHastaAhora = parseFloat("{{ total_pagos|floatformat:'2'|default:'0' }}".replace(",", ".")) || 0;
+            const totalFactura = parseFloat("{{ factura.total_con_interes|floatformat:'2'|default:'0' }}".replace(",", ".")) || 0;
+
+            if ((totalPagadoHastaAhora + monto) > totalFactura) {
+                alert("⚠️ El monto de la entrega supera la deuda restante. No se puede registrar.");
+                return; // 🚫 No envía el fetch
+            }
+
+            fetch(`/libros/factura/${facturaId}/pago_credito/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    tipo_pago: tipoPago,
+                    metodo_pago: metodoPago,
+                    monto_pagado: monto,
+                    interes: interes,
+                    cuotas: cuotas,
+                    tarjeta_numero: tarjetaNumero,
+                    interes_aplicado: interesAplicado,
+                    total_con_interes: totalConInteres,
+                    cantidad_cuotas: document.getElementById("cantidad_cuotas").value,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("✅ Entrega registrada con éxito.");
+                    window.open(`/libros/generar_pdf_credito/${facturaId}/`, '_blank');
+                    setTimeout(() => {
+                        window.location.href = `/libros/factura/${facturaId}/pago_credito/`;
+                    }, 1500);
+                } else {
+                    alert("⚠️ Error: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    });
+</script>
+    
+<!---------------- biene del Boton oculto Entrega ------------------------------>    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const botonRegistrarEntrega = document.getElementById("boton_registrar_entrega");
+    
+        if (botonRegistrarEntrega) {
+            botonRegistrarEntrega.addEventListener("click", function () {
+                const facturaId = document.getElementById("modal-factura-id-entrega").value;
+                const metodoPago = document.getElementById("metodo_pago_entrega").value;
+                const monto = parseFloat(document.getElementById("monto_entregado").value) || 0;
+                const entregaCta = monto;  // En este caso, entrega directa sin interés
+    
+                fetch(`/libros/factura/${facturaId}/pago_credito/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({
+                        tipo_pago: "entrega",
+                        metodo_pago: metodoPago,
+                        monto_pagado: monto,
+                        entrega_cta: entregaCta,
+                        cantidad_cuotas: document.getElementById("cantidad_cuotas").value,
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("✅ Entrega registrada con éxito.");
+                        window.open(`/libros/generar_pdf_credito/${facturaId}/`, '_blank');
+                        setTimeout(() => {
+                            window.location.href = `/libros/factura/${facturaId}/pago_credito/`;
+                        }, 1500);
+                    } else {
+                        alert("⚠️ Error: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            });
+        }
+    });
+    </script>
+<!---------------- Fin Entrega ------------------------------>
+<!---------------- Fin Entrega ------------------------------>  
+{% endif %}
+
+
+<hr>
+<!------------------------------ Historial de Pagos ----------------------->
+<!------------------------------ Historial de Pagos ----------------------->
+<!------------------------------ Historial de Pagos ----------------------->
+<h2>Historial de Pagos</h2>
+<div class="table-container">
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Factura Nº</th>
+                <th>Descripción</th>
+                <th>Fecha de Pago</th>
+                <th>Imp. Cuota Pagada</th>
+                <th>Entrega a Cuenta</th>
+                <th>Estado</th>
+
+                {% if user.is_staff %}
+                {% if estado_credito != "Pagado" %}
+                <th>Eliminar</th>
+                {% endif %}
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for pago in factura.cuenta_corriente.all %}
+                <tr>
+                    <td>{{ pago.numero_factura }}</td>
+                    <td>{{ pago.descripcion }}</td>
+                    <td>{{ pago.fecha_cuota }}</td>
+                    <td>${{ pago.imp_cuota_pagadas }}</td>
+                    <td>${{ pago.entrega_cta }}</td>
+                    <td>
+                        <span class="{% if estado_credito == 'Pagado' %}text-success{% else %}text-danger{% endif %} fw-bold">
+                            {{ estado_credito }}
+                        </span>
+                    </td>
+                   
+                    
+
+                    {% if user.is_staff %}
+                    {% if estado_credito != "Pagado" %}
+                    <td>
+                        <form method="POST" action="{% url 'libros:eliminar_pago_credito' pago.id %}" onsubmit="return confirm('¿Seguro de eliminar este pago?');">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn">❌ Eliminar</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                    {% endif %}
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="empty-row">No hay pagos registrados</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+/* Contenedor responsivo */
+.table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
+/* Tabla estilizada */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    margin-top: 10px;
+    min-width: 600px;
+}
+
+.styled-table th, .styled-table td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.styled-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Estilo de la fila vacía */
+.empty-row {
+    text-align: center;
+    font-style: italic;
+}
+
+/* Botón de eliminar */
+.delete-btn {
+    background-color: red;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.delete-btn:hover {
+    background-color: darkred;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .styled-table th, .styled-table td {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+</style>
+{% endblock %}

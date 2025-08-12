@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navegacion %}
+{% include 'navegacion.html' %}
+{% endblock %}
+
+{% block contenido %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .factura-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 15px;
+        }
+        .factura-info div {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 10px;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #1f2020;
+            color: white;
+        }
+        .total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .btn-print { background-color: #171718; }
+        .btn-whatsapp { background-color: #191a19; }
+        .btn-email { background-color: #0e0d0c; }
+        .btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+
+<div class="container">
+    <h1 style="text-align: right;">Factura Nº {{ factura.numero_factura }}</h1>
+<hr>
+    <div class="factura-info">
+        <div>
+            <p><strong>Fecha:</strong> {{ factura.fecha }}</p>
+            <p><strong>Cliente:</strong> {{ factura.nombre_cliente }} {{ factura.apellido_cliente }}</p>
+            <p><strong>DNI Nº:</strong> {{ factura.dni_cliente }}</p>
+        </div>
+        <div>
+            <p><strong>Método de Pago:</strong> {{ factura.metodo_pago }}</p>
+            <p><strong>Numero de Targeta o Ticket:</strong> {{ factura.tarjeta_numero }}</p>
+            <p><strong>Vendedor:</strong> {{ factura.vendedor }}</p>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>N° Producto</th>
+                    <th>Nombre Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in detalle_productos %}
+                <tr>
+                    <td>{{ producto.numero_producto }}</td>
+                    <td>{{ producto.nombre_producto }}</td>
+                    <td>{{ producto.cantidad_vendida }}</td>
+                    <td>${{ producto.precio_unitario }}</td>
+                    <td>${{ producto.subtotal }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p class="total">Total Producto: <strong>${{ factura.total }}</strong></p>
+    <p class="total">Desc %: <strong>${{ factura.descuento }}</strong></p>
+    <p class="total">Importe c/Descuento: <strong>${{ factura.total_descuento }}</strong></p>
+    <hr>
+    <p class="total">Interes %: <strong>{{ factura.interes }}</strong></p>
+    <p class="total">Cuota Nº: <strong>{{ factura.cuotas }}</strong></p>
+    <p class="total">Cuota Neta: <strong>${{ factura.cuota_mensual }}</strong></p>
+    <p class="total">Total Neto a Pagar: <strong>${{ factura.total_con_interes }}</strong></p>
+    
+
+    <a href="{% url 'modulo1:factura_pdf_directo' factura.id %}" target="_blank" class="btn btn-dark">
+    Mostrar PDF Generado
+    </a>
+
+
+
+</div>
+</body>
+{% endblock %}
