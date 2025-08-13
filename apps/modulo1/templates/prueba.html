@@ -302,11 +302,9 @@
     <div style="margin-top: 5px; line-height: 1.2; position: relative;">
         <form id="form_cliente" method="POST">
             {% csrf_token %}
-            <label for="nombre_apellido_cliente" style="font-size: 14px; white-space: nowrap; color: #0c5094;">
-                Buscar Cliente:
-            </label>
+
             <input type="text" id="nombre_apellido_cliente" name="nombre_apellido_cliente"
-                placeholder="Nombre o Apellido" autocomplete="off"
+                placeholder="Cliente" autocomplete="off"
                 style="width: 200px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px;">
             <input type="hidden" id="dni_cliente_hidden" name="dni_cliente" value="{{ dni_cliente }}">
             <ul id="sugerencias_cliente" class="list-group"
