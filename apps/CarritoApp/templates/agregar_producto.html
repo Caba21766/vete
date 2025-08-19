@@ -246,18 +246,25 @@
                                 </td>
                                 <td>{{ producto.stock }}</td>
                                 <td>${{ producto.precio }}</td>
-
-                                <td>
+                                <td class="text-center">
+                                <div class="btn-group-vertical btn-group-sm" role="group">
                                     <a href="{% url 'CarritoApp:modificar_producto' producto.id %}" 
-                                       class="btn btn-secondary btn-sm" title="Editar">
-                                        <i class="bi bi-pencil-fill"></i>
+                                    class="btn btn-secondary" title="Editar">
+                                    <i class="bi bi-pencil-fill"></i>
                                     </a>
-                                    <a href="{% url 'CarritoApp:eliminar_producto' producto.id %}" 
-                                       class="btn btn-danger btn-sm" title="Eliminar">
-                                        <i class="bi bi-x-lg"></i>
-                                    </a>
-                                </td>
 
+                                    <a href="{% url 'CarritoApp:eliminar_producto' producto.id %}" 
+                                    class="btn btn-danger" title="Eliminar">
+                                    <i class="bi bi-x-lg"></i>
+                                    </a>
+
+                                    <!-- Nuevo botón: Compra (manda producto_id por querystring) -->
+                                    <a href="{% url 'CarritoApp:agregar_compra' %}?producto_id={{ producto.id }}" 
+                                    class="btn btn-success" title="Compra">
+                                    <i class="bi bi-bag-plus-fill"></i> Compra
+                                    </a>
+                                </div>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

@@ -136,3 +136,16 @@ class MetodoPagoAdmin(admin.ModelAdmin):
 
 # Registrar CuotaInteres por separado para visualizarla también desde el admin (si querés)
 admin.site.register(CuotaInteres)
+
+
+
+# -------------------------------------------------
+# apps/CarritoApp/admin.py
+from django.contrib import admin
+from .models import MensajeCliente
+
+@admin.register(MensajeCliente)
+class MensajeClienteAdmin(admin.ModelAdmin):
+    list_display = ("id", "apellido", "nombre", "pedido", "creado_en", "respondido", "activo")
+    list_filter = ("respondido", "activo", "creado_en")
+    search_fields = ("apellido", "nombre", "pedido", "email_contacto")

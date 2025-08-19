@@ -96,46 +96,55 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
+            
             <tbody>
-                {% for compra in compras %}
-                
-                <tr>
-                    <td>{{ compra.producto.numero_producto }}</td>
-                    <td>{{ compra.producto.nombre_producto }}</td>
-                    <td>{{ compra.cantidad|default:"0" }}</td>
-                    <td>${{ compra.precio_compra|default:"0.00"|floatformat:2 }}</td>
-                    <td>{{ compra.factura_compra }}</td>
-                    <td>{{ compra.fecha_compra }}</td>
-                    <td>{{ compra.provedor.nombre }}</td>
-                    <td class="d-flex justify-content-center gap-2">
-                        <!-- Botón Modificar -->
+                {# agrupamos por fecha_compra #}
+                {% regroup compras by fecha_compra as compras_por_fecha %}
+
+                {% for grupo in compras_por_fecha %}
+                    {# Cabecera de fecha + línea separadora #}
+                    <tr>
+                    <td colspan="8" class="bg-white">
+                        <div class="d-flex align-items-center py-1">
+                        <span class="fw-bold text-secondary">
+                            <i class="fas fa-calendar-alt me-2"></i>{{ grupo.grouper|date:"d/m/Y" }}
+                        </span>
+                        <div class="flex-grow-1 ms-3" style="border-top:2px solid #dee2e6;"></div>
+                        </div>
+                    </td>
+                    </tr>
+
+                    {# filas de esa fecha #}
+                    {% for compra in grupo.list %}
+                    <tr>
+                        <td>{{ compra.producto.numero_producto }}</td>
+                        <td>{{ compra.producto.nombre_producto }}</td>
+                        <td>{{ compra.cantidad|default:"0" }}</td>
+                        <td>${{ compra.precio_compra|default:"0.00"|floatformat:2 }}</td>
+                        <td>{{ compra.factura_compra }}</td>
+                        <td>{{ compra.fecha_compra|date:"d/m/Y" }}</td>
+                        <td>{{ compra.provedor.nombre }}</td>
+                        <td class="d-flex justify-content-center gap-2">
                         <a href="{% url 'CarritoApp:modificar_compra' compra.id %}" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-pencil-alt"></i> <!-- Ícono de lápiz -->
+                            <i class="fas fa-pencil-alt"></i>
                         </a>
-                    
-                        <!-- Botón Eliminar -->
                         <form action="{% url 'CarritoApp:eliminar_compra' compra.id %}" method="post" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta compra?')">
-                                <i class="fas fa-times"></i> <!-- Ícono de "X" -->
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¿Estás seguro de eliminar esta compra?')">
+                            <i class="fas fa-times"></i>
                             </button>
                         </form>
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+                    {% endfor %}
                 {% empty %}
-                <tr>
+                    <tr>
                     <td colspan="8" class="text-center text-muted">No se encontraron compras.</td>
-                </tr>
+                    </tr>
                 {% endfor %}
             </tbody>
-            <tfoot class="table-footer">
-                <tr>
-                    <td colspan="2">Se compró la Cantidad de:</td>
-                    <td>{{ total_cantidad|default:"0" }}</td>
-                    <td colspan="2">Por el Precio:</td>
-                    <td>${{ total_precio|default:"0.00"|floatformat:2 }}</td>
-                </tr>
-            </tfoot>
+
         </table>
     </div>
 {% else %}

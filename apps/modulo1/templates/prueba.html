@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <hr>
 <!-- Formulario para buscar producto en una sola fila -->
-<div style="display: flex; margin-top: 10px;"> 
+<div style="display: flex; margin-top: 10px; background-color: #f2f2f2; padding: 8px; border-radius: 5px;"> 
     <!-- Formulario para buscar producto en una sola fila -->
     <form id="producto-form" class="flex-wrap mb-3">
         {% csrf_token %}
@@ -411,13 +411,13 @@ document.addEventListener('DOMContentLoaded', function () {
             <!-- Campo: N° Producto -->
             <label for="numero_producto" class="me-2 mb-0" style="font-size: 12px;">N° Producto:</label>
             <input type="text" id="numero_producto" name="numero_producto" class="form-control form-control-sm" 
-                   placeholder="Ingrese número de producto" style="width: 100px; font-size: 10px;">
+                   placeholder="Número Producto" style="width: 100px; font-size: 10px;">
             <button type="button" id="buscar-mercaderia-numero" class="btn btn-success btn-sm me-2" style="font-size: 10px;">Buscar</button>
             
             <!-- Campo: Nombre Producto -->
             <label for="nombre_producto" class="me-2 mb-0" style="font-size: 12px;">Nombre Producto:</label>
             <input type="text" id="nombre_producto" name="nombre_producto" class="form-control form-control-sm" 
-                   placeholder="Ingrese nombre de producto" autocomplete="off" style="width: 120px; font-size: 10px;">
+                   placeholder="Nombre de Producto" autocomplete="off" style="width: 120px; font-size: 10px;">
             <!-- Lista de sugerencias con ancho limitado -->
             <ul id="sugerencias" class="list-group position-absolute" 
                 style="z-index: 1000; display: none; width: 180px; max-width: 180px; 
@@ -430,7 +430,11 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 <hr>
 <!-- fin de Formulario para buscar producto en una sola fila -->
-
+<style>
+    #buscar-mercaderia-nombre {
+        display: none;
+    }
+</style>
 
 
 <!----------------------------------------- Tabla de la factura -->

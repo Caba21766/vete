@@ -1,19 +1,23 @@
-# Python
-__pycache__/
-*.py[cod]
-*.log
-
-# Entornos
+# Entorno virtual
 env/
 venv/
 .env
 
-# Django
+# Archivos de caché Python
+__pycache__/
+*.pyc
+
+# Archivos de base de datos
+*.sqlite3
+
+# Archivos temporales o locales
+*.log
+*.sock
+
+# Archivos generados
 media/
 staticfiles/
-*.pid
-gunicorn.sock
 
-# IDE
+# Configuración de IDE
 .vscode/
-.idea/
+

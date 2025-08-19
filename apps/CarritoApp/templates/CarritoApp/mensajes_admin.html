@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="container mt-4">
+  <h3>Mensajes de Clientes</h3>
+
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-auto">
+      <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Buscar por texto">
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-sm btn-primary">Buscar</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+      <thead>
+        <tr>
+          <th>ID</th><th>Apellido y Nombre</th><th>Pedido</th><th>Fecha-Hora</th><th>Respondido</th><th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for m in mensajes %}
+        <tr>
+          <td>{{ m.id }}</td>
+          <td>{{ m.apellido }} {{ m.nombre }}</td>
+          <td style="max-width:380px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.pedido }}</td>
+          <td>{{ m.creado_en|date:"d/m/Y H:i" }}</td>
+          <td>{% if m.respondido %}<span class="badge bg-success">Sí</span>{% else %}<span class="badge bg-warning text-dark">No</span>{% endif %}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#r{{m.id}}">Responder</button>
+            <form action="{% url 'CarritoApp:eliminar_mensaje' m.id %}" method="post" class="d-inline">
+              {% csrf_token %}<button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar mensaje #{{m.id}}?')">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        <tr class="collapse" id="r{{m.id}}">
+          <td colspan="6">
+            <form method="post" action="{% url 'CarritoApp:responder_mensaje' m.id %}">
+              {% csrf_token %}
+              <div class="mb-2">
+                <label class="form-label">Respuesta</label>
+                <textarea name="respuesta" class="form-control" rows="3" required>{{ m.respuesta }}</textarea>
+              </div>
+              <button class="btn btn-sm btn-primary">Guardar respuesta</button>
+              {% if m.email_contacto %}<small class="text-muted ms-2">Se enviará a: {{ m.email_contacto }}</small>{% endif %}
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="text-center">Sin mensajes.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

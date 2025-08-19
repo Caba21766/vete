@@ -3,6 +3,7 @@ from . import views
 from apps.CarritoApp.views import imprimir_caja, obtener_stock
 from .views import vista_resumen_factura
 from .views import pago_exitoso, pago_fallo, pago_pendiente
+from . import views as vm   
 
 # Importa las vistas correctas
 
@@ -10,7 +11,7 @@ app_name = 'CarritoApp'  # Especificar el espacio de nombres para las rutas
 # Define las URLs de la app
 urlpatterns = [
     #---------------------------------------------------------------------------------------------
-    path('listado_compra/', views.listado_compra, name='listado_compra'), 
+    #path('listado_compra/', views.listado_compra, name='listado_compra'), 
     path('agregar_categoria/', views.agregar_categoria, name='agregar_categoria'),
     path('agregar_producto/', views.agregar_o_modificar_producto, name='agregar_producto'),
     path('modificar_producto/<int:pk>/', views.agregar_o_modificar_producto, name='modificar_producto'),
@@ -104,6 +105,22 @@ urlpatterns = [
     path('pago/exito/', views.pago_exitoso, name='pago_exitoso'),
     path('pago/pendiente/', views.pago_pendiente, name='pago_pendiente'),
     path('pago/fallo/', views.pago_fallido, name='pago_fallo'),
+
+    # apps/CarritoApp/urls.py
+    path('compra/agregar/', views.agregar_compra, name='agregar_compra'),
+    
+
+
+    # MENSAJES... tus rutas previas
+    path("mensajes/enviar/", vm.crear_mensaje, name="crear_mensaje"),
+    path("admin/mensajes/", vm.lista_mensajes, name="mensajes_admin"),
+    path("admin/mensajes/<int:pk>/responder/", vm.responder_mensaje, name="responder_mensaje"),
+    path("admin/mensajes/<int:pk>/eliminar/", vm.eliminar_mensaje, name="eliminar_mensaje"),
+
+    path("mis-mensajes/", vm.mis_mensajes, name="mis_mensajes"),
+
+
+
 
 ]
 #---------------------------------------------------------------------------------------------

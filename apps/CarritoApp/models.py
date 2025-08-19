@@ -265,3 +265,40 @@ class TipoPago(models.Model):
 
     def __str__(self):
         return self.tipo_pago
+
+
+#----------------Mensajes al Administrador-----------------------------#
+
+# apps/CarritoApp/models.py
+from django.db import models
+from django.conf import settings
+
+class MensajeCliente(models.Model):
+    # ID autoincremental (id) lo crea Django
+    apellido = models.CharField(max_length=80)
+    nombre = models.CharField(max_length=80)
+    pedido = models.CharField("Mensaje / Pedido", max_length=255)
+    email_contacto = models.EmailField(blank=True, null=True)  # opcional, por si querés responder por mail
+    creado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        related_name="mensajes_enviados", null=True, blank=True
+    )
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    # Respuesta del admin
+    respondido = models.BooleanField(default=False)
+    respuesta = models.TextField(blank=True, null=True)
+    respondido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        related_name="mensajes_respondidos", null=True, blank=True
+    )
+    respondido_en = models.DateTimeField(null=True, blank=True)
+
+    # “Eliminado” lógico para no perder historial
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["-creado_en"]
+
+    def __str__(self):
+        return f"{self.id} - {self.apellido}, {self.nombre}"

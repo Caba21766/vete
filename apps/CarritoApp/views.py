@@ -5,7 +5,6 @@ from .forms import ProductoForm
 import os
 from django.conf import settings
 
-
 def agregar_o_modificar_producto(request, pk=None):
     # Si se proporciona pk, estamos editando un producto existente
     if pk:
@@ -77,54 +76,70 @@ def eliminar_producto(request, pk):
 
 #-----------Agregar Compra---------------------------------#
 # -----apps/CarritoApp/views.py -- 
-from .forms import ProductoForm
-from django.contrib import messages  # Para manejar mensajes en la plantilla
-from .forms import CompraForm
-from django.shortcuts import render, get_object_or_404
+# apps/CarritoApp/views.py
+
+from django.contrib import messages
 from .models import Compra, Producto
+from .forms import CompraForm
+from django.shortcuts import render, get_object_or_404, redirect
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Compra, Producto
+from .forms import CompraForm
+
+TEMPLATE_AGREGAR_COMPRA = 'agregar_compra.html'  # 👈 así, sin prefijo
 
 def agregar_compra(request):
-    # Obtener todas las compras existentes
     compras = Compra.objects.all().order_by('-fecha_compra')
+
+    producto_pre = None
+    pid = (request.GET.get('producto_id') or '').strip()
+    if pid.isdigit():
+        producto_pre = get_object_or_404(Producto, pk=int(pid))
 
     if request.method == 'POST':
         form = CompraForm(request.POST, request.FILES)
 
-        # Capturar datos adicionales del formulario
-        numero_producto = request.POST.get('numero_producto', None)
-        producto_id = request.POST.get('producto_id', None)
+        numero_producto = (request.POST.get('numero_producto') or '').strip()
+        producto_id = (request.POST.get('producto_id') or '').strip()
 
-        # Validación de entrada
         producto = None
-        try:
-            # Validar si `numero_producto` es un número
-            if numero_producto and numero_producto.isdigit():
-                producto = Producto.objects.get(numero_producto=numero_producto)
-            elif producto_id and producto_id.isdigit():  # Validar si `producto_id` es un número
-                producto = Producto.objects.get(id=producto_id)
-            else:
-                raise ValueError("El número de producto o ID proporcionado no es válido.")
-        except Producto.DoesNotExist:
-            # Mensaje de error si no se encuentra el producto
-            messages.error(request, "El producto no existe. Por favor, regístralo antes de continuar.")
-        except ValueError as e:
-            # Mensaje de error si el valor no es numérico
-            messages.error(request, str(e))
+        if numero_producto.isdigit():
+            producto = Producto.objects.filter(numero_producto=numero_producto).first()
+        if not producto and producto_id.isdigit():
+            producto = Producto.objects.filter(id=int(producto_id)).first()
+        if not producto and producto_pre:
+            producto = producto_pre
 
-        # Si se encontró el producto, intentar guardar la compra
-        if producto:
-            if form.is_valid():
-                compra = form.save(commit=False)
-                compra.producto = producto
-                compra.save()
-                messages.success(request, "¡Compra guardada correctamente!")
-                form = CompraForm()  # Reiniciar el formulario
-            else:
-                messages.error(request, "Hubo un error al guardar la compra. Verifica los datos ingresados.")
-    else:
-        form = CompraForm()
+        if not producto:
+            messages.error(request, "No se encontró el producto. Verificá el número o seleccioná uno.")
+            return render(request, TEMPLATE_AGREGAR_COMPRA,  # 👈 nombre corto
+                          {'form': form, 'compras': compras, 'producto': producto_pre})
 
-    return render(request, 'agregar_compra.html', {'form': form, 'compras': compras})
+        if form.is_valid():
+            compra = form.save(commit=False)
+            compra.producto = producto
+            compra.save()
+            messages.success(request, "¡Compra guardada correctamente!")
+            return redirect('CarritoApp:agregar_producto')
+
+        messages.error(request, "Hay errores en el formulario. Verificá los datos.")
+        return render(request, TEMPLATE_AGREGAR_COMPRA,
+                      {'form': form, 'compras': compras, 'producto': producto_pre})
+
+    form = CompraForm()
+    return render(request, TEMPLATE_AGREGAR_COMPRA,
+                  {'form': form, 'compras': compras, 'producto': producto_pre})
+
+
+
+
+
+
+
+
+
 
 
 #-----------de compra... es un JSON----------------------------------------#
@@ -228,17 +243,16 @@ def eliminar_compra(request, pk):
     return render(request, 'confirmar_eliminar.html', {'compra': compra})
 
 
-
 # ---------Planilla de Compra - planilla de Compra con filtros --------------
 from django.shortcuts import render
 from .models import Compra
 from decimal import Decimal
 
+# Planilla1
 def planilla_compra(request):
-    # Obtener todas las compras
     compras = Compra.objects.all()
 
-    # Aplicar filtros si existen
+    # Filtros
     producto = request.GET.get('producto')
     fecha_compra = request.GET.get('fecha_compra')
     factura = request.GET.get('factura')
@@ -253,67 +267,23 @@ def planilla_compra(request):
     if proveedor:
         compras = compras.filter(provedor__nombre__icontains=proveedor)
 
-    # Calcular totales
-    total_cantidad = sum(compra.cantidad for compra in compras if compra.cantidad)
-    total_precio = sum(Decimal(compra.precio_compra) for compra in compras if compra.precio_compra)
+    # 🔽 orden: fecha desc, y de yapa id desc para desempatar
+    compras = compras.order_by('-fecha_compra', '-id')
 
-    # Depuración
-    print(f"Total Cantidad: {total_cantidad}")
-    print(f"Total Precio: {total_precio}")
+    # Totales
+    total_cantidad = sum(c.cantidad for c in compras if c.cantidad)
+    from decimal import Decimal
+    total_precio = sum(Decimal(c.precio_compra) for c in compras if c.precio_compra)
 
-    # Renderizar plantilla
     return render(request, 'CarritoApp/planilla_compra.html', {
         'compras': compras,
         'total_cantidad': total_cantidad,
         'total_precio': total_precio,
     })
 
+
+
 # --------------------Listado de Compra - listado de Compra con filtros --------------
-from django.shortcuts import render
-from .models import Compra
-from decimal import Decimal
-
-def listado_compra(request):
-    # Obtén todas las compras
-    compras = Compra.objects.all()
-
-    # Aplicar filtros (si los hay)
-    fecha = request.GET.get('fecha_compra')
-    factura = request.GET.get('factura')
-    proveedor = request.GET.get('proveedor')
-    producto = request.GET.get('producto')
-
-    if fecha:
-        compras = compras.filter(fecha_compra=fecha)
-    if factura:
-        compras = compras.filter(factura_compra__icontains=factura)
-    if proveedor:
-        compras = compras.filter(provedor__nombre__icontains=proveedor)
-    if producto:
-        compras = compras.filter(producto__nombre_producto__icontains=producto)
-
-    # Depuración: Verifica si se están obteniendo registros
-    print("Compras obtenidas después de filtros:")
-    for compra in compras:
-        
-        print(f"Producto: {compra.producto}, Cantidad: {compra.cantidad}, Precio: {compra.precio_compra}")
-
-    # Cálculos de totales
-    total_cantidad = sum(compra.cantidad for compra in compras if compra.cantidad)
-    total_precio = sum(compra.precio_compra for compra in compras if compra.precio_compra)
-
-    # Depuración: Verifica los totales calculados
-    print(f"Total Cantidad Calculado: {total_cantidad}")
-    print(f"Total Precio Calculado: {total_precio}")
-    print(f"Contexto enviado a la plantilla -> Total Cantidad: {total_cantidad}, Total Precio: {total_precio}")
-
-    # Renderiza la plantilla con los datos
-    return render(request, 'listado_compra.html', {
-        'compras': compras,
-        'total_cantidad': total_cantidad,
-        'total_precio': total_precio,
-    })
-
 #------------------Agregar_categorias-------------------------------
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -808,6 +778,29 @@ def lista_cierre_de_caja(request):
     # Nuevo total: caja real + lo cobrado de cuenta corriente
     total_real_con_credito = total_en_caja_sin_cta_corriente_facturada + total_cta_corriente_cobrado
 
+
+    # ==== Resumen por método (FACTURADO) ====
+    resumen_metodos = (
+        facturas
+        .annotate(
+            metodo_nombre=Case(
+                When(metodo_pago__tarjeta_nombre__isnull=False, then=Trim('metodo_pago__tarjeta_nombre')),
+                When(metodo_pago_manual__isnull=False, then=Trim('metodo_pago_manual')),
+                default=Value('Sin especificar'),
+                output_field=CharField(),
+            )
+        )
+        .values('metodo_nombre')
+        .annotate(total=Sum('total_con_interes'))
+        .order_by('metodo_nombre')
+    )
+
+    # ==== Cuenta Corriente COBRADO (pagos registrados en CuentaCorriente) ====
+    cobro_cta_corriente = pagos_cta_corriente.aggregate(
+        total=Sum('imp_cuota_pagadas') + Sum('entrega_cta')
+    )['total'] or 0
+
+
     # ---------------------------------------------------------------------
     # 👇 NUEVO: Unificar facturas + pagos en "movimientos" y ordenar por fecha
     movimientos = []
@@ -826,6 +819,11 @@ def lista_cierre_de_caja(request):
                 else (f.metodo_pago_manual or 'Sin especificar')
             ),
             'estado_credito': getattr(f, 'estado_credito', ''),
+
+            # 👇 ESTO FALTABA: pasar el valor crudo que está guardado en la BD
+            'estado_entrega': f.estado_entrega,                   # 'pendiente' | 'aceptado' | 'rechazado'
+            'estado_entrega_label': f.get_estado_entrega_display(),  # opcional
+
             'tarjeta_numero': getattr(f, 'tarjeta_numero', ''),
             'numero_tiket': getattr(f, 'numero_tiket', ''),
             'total': f.total_con_interes,
@@ -883,7 +881,9 @@ def lista_cierre_de_caja(request):
         'facturado_cta_corriente': facturado_cta_corriente,
         'total_en_caja_sin_cta_corriente_facturada': total_en_caja_sin_cta_corriente_facturada,
         'total_real_con_credito': total_real_con_credito,
-        'movimientos': movimientos,  # ✅ CONTEXTO: lo que usa el nuevo <tbody> unificado
+        'movimientos': movimientos,  # ✅ CONTEXTO: lo qu
+        'resumen_metodos': resumen_metodos,
+        'cobro_cta_corriente': cobro_cta_corriente,
     })
 
 
@@ -2118,21 +2118,37 @@ def tipo_pago_create(request):
     return render(request, 'CarritoApp/tipo_pago_create.html', {'form': form})
 
 
-# ✅ aceptado o rechazado entrega
+
+# ---------------✅ aceptado o rechazado entrega -------------------------------
+# views.py
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect
-from .models import Factura
+from django.contrib import messages
+# from .models import Factura
 
 @require_POST
 def actualizar_estado_entrega(request, factura_id):
-    factura = get_object_or_404(Factura, id=factura_id)
-    nuevo_estado = request.POST.get('estado')
+    estado = (request.POST.get('estado') or '').strip().lower()
 
-    if nuevo_estado in ['pendiente', 'aceptado', 'rechazado']:
-        factura.estado_entrega = nuevo_estado
-        factura.save()
+    # Aceptamos ambos por si el template manda "entregado"
+    alias = {'entregado': 'aceptado'}
+    estado = alias.get(estado, estado)
 
-    return redirect(request.META.get('HTTP_REFERER', 'CarritoApp:lista_vendedor'))
+    VALIDOS = {'pendiente', 'aceptado', 'rechazado'}
+    if estado not in VALIDOS:
+        messages.error(request, "Estado inválido.")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+
+    factura = get_object_or_404(Factura, pk=factura_id)
+    if factura.estado_entrega != estado:
+        factura.estado_entrega = estado
+        factura.save(update_fields=['estado_entrega'])
+
+    messages.success(request, "Estado de entrega actualizado.")
+    # Vuelve a la misma página con los filtros
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
 
 
 #---------------lista_cuenta_corriente-------------------------------------#
@@ -2428,3 +2444,136 @@ def mp_webhook(request):
         return JsonResponse({"received": True})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+
+
+# -----------------------------------------------------------------------
+
+
+# apps/CarritoApp/views_mensajes.py
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Q
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from .forms import MensajeClienteForm
+from .models import MensajeCliente
+
+
+def es_staff(user):
+    return user.is_staff or user.groups.filter(name__in=["Administradores", "Facturadores"]).exists()
+
+
+# --- CLIENTE crea mensaje (requiere login) -----------------------------------
+@login_required
+@require_POST
+def crear_mensaje(request):
+    """
+    Crea un mensaje de cliente. Por seguridad, sobrescribe apellido, nombre y
+    email con los del usuario autenticado si existen.
+    """
+    form = MensajeClienteForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Revisá los datos del formulario.")
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+    obj = form.save(commit=False)
+    u = request.user
+    obj.creado_por = u
+
+    # Forzar datos del usuario si están presentes
+    if getattr(u, "last_name", ""):
+        obj.apellido = u.last_name
+    if getattr(u, "first_name", ""):
+        obj.nombre = u.first_name
+    if not obj.email_contacto and getattr(u, "email", ""):
+        obj.email_contacto = u.email
+
+    obj.save()
+    messages.success(request, "¡Tu mensaje fue enviado! Pronto te contactaremos.")
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+# --- ADMIN: listado, responder y eliminar ------------------------------------
+@user_passes_test(es_staff)
+def lista_mensajes(request):
+    """
+    Lista de mensajes para el administrador con búsqueda.
+    """
+    q = request.GET.get("q", "").strip()
+    mensajes = MensajeCliente.objects.filter(activo=True).order_by("-creado_en")
+    if q:
+        mensajes = mensajes.filter(
+            Q(pedido__icontains=q) |
+            Q(apellido__icontains=q) |
+            Q(nombre__icontains=q) |
+            Q(respuesta__icontains=q)
+        )
+    return render(request, "CarritoApp/mensajes_admin.html", {"mensajes": mensajes, "q": q})
+
+
+@user_passes_test(es_staff)
+@require_POST
+def responder_mensaje(request, pk):
+    msg = get_object_or_404(MensajeCliente, pk=pk, activo=True)
+    respuesta = request.POST.get("respuesta", "").strip()
+    if not respuesta:
+        messages.error(request, "La respuesta no puede estar vacía.")
+        return redirect("CarritoApp:mensajes_admin")
+
+    msg.respuesta = respuesta
+    msg.respondido = True
+    msg.respondido_por = request.user
+    msg.respondido_en = timezone.now()
+    msg.save()
+
+    # (Opcional) Enviar email si dejó correo
+    # if msg.email_contacto:
+    #     from django.core.mail import send_mail
+    #     send_mail(
+    #         subject=f"Respuesta a tu mensaje #{msg.id}",
+    #         message=respuesta,
+    #         from_email=None,
+    #         recipient_list=[msg.email_contacto],
+    #         fail_silently=True,
+    #     )
+
+    messages.success(request, f"Mensaje #{msg.id} respondido.")
+    return redirect("CarritoApp:mensajes_admin")
+
+
+@user_passes_test(es_staff)
+@require_POST
+def eliminar_mensaje(request, pk):
+    msg = get_object_or_404(MensajeCliente, pk=pk, activo=True)
+    msg.activo = False
+    msg.save(update_fields=["activo"])
+    messages.success(request, f"Mensaje #{msg.id} eliminado.")
+    return redirect("CarritoApp:mensajes_admin")
+
+
+# --- CLIENTE: ver sus propios mensajes (solo lectura) ------------------------
+@login_required
+def mis_mensajes(request):
+    """
+    El cliente ve sus mensajes y respuestas. Filtro por creado_por o por email.
+    """
+    q = request.GET.get("q", "").strip()
+    solo_respondidos = request.GET.get("respondidos") == "1"
+
+    mensajes = (MensajeCliente.objects
+                .filter(activo=True)
+                .filter(Q(creado_por=request.user) | Q(email_contacto=request.user.email))
+                .order_by("-creado_en"))
+
+    if q:
+        mensajes = mensajes.filter(Q(pedido__icontains=q) | Q(respuesta__icontains=q))
+    if solo_respondidos:
+        mensajes = mensajes.filter(respondido=True)
+
+    return render(
+        request,
+        "CarritoApp/mis_mensajes.html",
+        {"mensajes": mensajes, "q": q, "solo_respondidos": solo_respondidos},
+    )

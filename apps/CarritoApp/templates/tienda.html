@@ -82,7 +82,7 @@
     <div class="row">
         <div class="col-12 text-center">
             <h1 class="titulo-grueso text-start texto-estilizado" style="font-size: 1rem;">
-                <strong> Ecommerce: Gustavo Caballero - 3644-563925  </strong>
+                <strong> E-commerce: Gustavo Caballero - cel 3644-563925  </strong>
             </h1>
         </div>
     </div>
@@ -193,10 +193,6 @@
   </div>
 </div>
 
-
-
-
-
 <!-- Navegación de Páginas -->
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
@@ -218,6 +214,68 @@
         </ul>
     </nav>
 </div>
+
+<!-- Botón flotante o en el footer -->
+<!-- Botón flotante o en el footer -->
+<!-- Botón flotante o en el footer -->
+<!--<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalMensaje">
+  <i class="bi bi-chat-dots"></i> Mensaje
+</button>-->
+<!-- Modal -->
+
+<div class="modal fade" id="modalMensaje" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'CarritoApp:crear_mensaje' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Enviar mensaje al administrador</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+
+          {% if user.is_authenticated %}
+            <div class="mb-2">
+              <label class="form-label">Apellido</label>
+              <input type="text" name="apellido" class="form-control"
+                     value="{{ user.last_name }}" readonly>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Nombre</label>
+              <input type="text" name="nombre" class="form-control"
+                     value="{{ user.first_name }}" readonly>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Email (para respuesta)</label>
+              <input type="email" name="email_contacto" class="form-control"
+                     value="{{ user.email }}" readonly>
+            </div>
+          {% else %}
+            <!-- Invitados: mostrar campos editables o invitar a iniciar sesión -->
+            <div class="alert alert-info py-2">
+              Debés iniciar sesión para enviar un mensaje.
+              <a href="{% url 'apps.blog_auth:iniciar_sesion' %}" class="btn btn-sm btn-primary ms-2">Iniciar sesión</a>
+            </div>
+          {% endif %}
+
+          <div class="mb-2">
+            <label class="form-label">Mensaje / Pedido (máx. 255)</label>
+            <input type="text" name="pedido" maxlength="255" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          {% if user.is_authenticated %}
+            <button type="submit" class="btn btn-primary">Enviar</button>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 
 {% endblock %}

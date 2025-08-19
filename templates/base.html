@@ -30,13 +30,10 @@
 </a>
 
 <style>
-
     .fuente-animal {
         font-family: 'Lobster', cursive;
         font-size: 22px;
     }
-
-
 .whatsapp-float {
     position: fixed;
     bottom: 20px;
@@ -60,9 +57,38 @@
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
+
+
+#btn-mensaje-flotante{
+  position: fixed;
+  width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1050;                   /* por encima del contenido */
+  box-shadow: 0 6px 16px rgba(0,0,0,.25);
+}
+
+/* Opción A: botón por encima del WhatsApp (si WhatsApp está en bottom:20px; right:20px) */
+.mensaje-float-up { right: 20px; bottom: 90px; }
+
+/* Opción B: botón a la izquierda del WhatsApp */
+.mensaje-float-left { right: 90px; bottom: 20px; }
+
+/* Ajuste móvil para que no se pisen */
+@media (max-width: 576px){
+  .mensaje-float-up   { bottom: 84px; right: 16px; }
+  .mensaje-float-left { right: 84px; bottom: 16px; }
+}
 </style>
 
 <body>
+    <button id="btn-mensaje-flotante"
+            class="btn rounded-circle shadow mensaje-float-up"
+            style="background-color:#4d4c26; border:none; color:rgb(196, 228, 196);"
+            type="button" aria-label="Enviar mensaje"
+            data-bs-toggle="modal" data-bs-target="#modalMensaje">
+        <i class="bi bi-chat-dots fs-3"></i> Pida por mensaje
+    </button>
+
     <!-- Barra de navegación -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="padding-top: 1px; padding-bottom: 1px;">
 
@@ -78,13 +104,11 @@
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             
             <!-- Contenido del menú -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        
                                             
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="colaboradorDropdown" role="button"
@@ -96,6 +120,10 @@
                                 <li><a class="dropdown-item" href="{% url 'CarritoApp:mis_facturas' %}">Mis Compras</a></li>
                                 <li><a class="dropdown-item" href="{% url 'libros:listar_ctacorriente' %}">Cuenta Corriente</a></li>
                                 <li><a class="dropdown-item" href="{% url 'mascota:lista_mascotas' %}">Mi Familia</a></li>
+                                <li>
+                                <a class="dropdown-item" href="{% url 'CarritoApp:mis_mensajes' %}">Mensajes</a>
+                                </li>
+
                             </ul>
                         </li>
                         
@@ -103,7 +131,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'nosotros' %}" style="font-weight: bold; color: #75bb93;">Veterinaria</a>
-                    </li
+                    </li>
 
                     
 
@@ -115,21 +143,14 @@
                             Productos
                         </a>
 
-                        <ul class="dropdown-menu" aria-labelledby="colaboradorDropdown">
-
+                        <ul class="dropdown-menu"       
+                            aria-labelledby="colaboradorDropdown">
                             <li><a class="dropdown-item" href="{% url 'CarritoApp:tipo_pago_list' %}" style="color: #0d3b66; font-weight: bold;">
                             Tipo Pago Carrito Online</a></li>
-
                             <li><a class="dropdown-item" href="{% url 'modulo1:agregar_metodo_pago' %}" style="color: #2e7d32; font-weight: bold;">Modo de Pago Factura</a></li>
-
                             <li><a class="dropdown-item" href="{% url 'CarritoApp:agregar_provedor' %}">Proveedores</a></li>
                             <li><a class="dropdown-item" href="{% url 'CarritoApp:agregar_categoria' %}">Categoría</a></li>
                             <li><a class="dropdown-item fw-bold" href="{% url 'CarritoApp:agregar_producto' %}">Agregar y Editar Producto</a></li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'CarritoApp:agregar_compra' %}" style="font-weight:bold; color:#921606;">
-                                  Agregar Compra
-                                </a>
-                              </li>
                             <li><a class="dropdown-item" href="{% url 'CarritoApp:planilla_compra' %}">Planilla de Compra</a></li>
                         </ul>
                     </li>
@@ -143,6 +164,12 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="colaboradorDropdown">
                             <li><a class="dropdown-item" href="{% url 'opiniones:listar' %}">Consutas de Productos</a></li>
+
+                            <li>
+                            <a class="dropdown-item" href="{% url 'CarritoApp:mensajes_admin' %}">
+                                Mensaje de Clientes
+                            </a>
+                            </li>
                         </ul>
                     </li>
                 {% endif %}
@@ -157,12 +184,8 @@
                         <ul class="dropdown-menu" aria-labelledby="colaboradorDropdown">
                             <li><a class="dropdown-item" href="{% url 'CarritoApp:listar_facturas' %}">Cierre de Caja</a></li>
                             <li><a class="dropdown-item" href="{% url 'CarritoApp:modificacion_stock' %}">Stock en Deposito</a></li>
-                            <li><a class="dropdown-item" href="{% url 'CarritoApp:lista_vendedor' %}">Listado Vendedor</a></li>
                             <li><a class="dropdown-item" href="{% url 'CarritoApp:movimiento_cliente' %}">Listado de Facturas</a></li>
-                            
                             <li><a class="dropdown-item" href="{% url 'CarritoApp:lista_cuenta_corriente' %}">Listado Cuenta Cte</a></li>
-
-                            
                             <li><a class="dropdown-item" href="{% url 'CarritoApp:productos_vendidos' %}">Productos Vendidos</a></li>
                         </ul>
                     </li>
@@ -181,8 +204,6 @@
                         </ul>
                     </li>
                 {% endif %}
-
-                
                 </ul>
 
 
@@ -203,27 +224,28 @@
                                 <span>{{ user.username }}</span>
                             </div>
                         </a>
+
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{% url 'apps.blog_auth:editar_usuario' user.pk %}">Modificar Perfil</a></li>
 
                             {% if user.is_staff %}
                             <li> <a class="dropdown-item" href="{% url 'blog_auth:lista_usuarios' %}">Listado de Usuarios</a></li>
                             {% endif %}
-                            
+                            <li>
                             <form method="post" action="{% url 'apps.blog_auth:cerrar_sesion' %}">
                                 {% csrf_token %}
                                 <button type="submit" class="dropdown-item">Cerrar sesión</button>
                             </form>
+                            </li>
                         </ul>
-                        
-                    </li>
+                   
                     {% else %}
                     
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'apps.blog_auth:iniciar_sesion' %}" style="font-weight: bold; font-size: 18px;">
-                          Iniciar Sesión
-                        </a>
-                      </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'apps.blog_auth:iniciar_sesion' %}" style="font-weight: bold; font-size: 18px;">
+                            Iniciar Sesión
+                            </a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
@@ -233,7 +255,6 @@
     {% block contenido %}
      <!-- contenido -->
     {% endblock %}
-
 
 
 <!-- Pie de página -->

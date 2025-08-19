@@ -108,10 +108,7 @@ class FacturaImagenForm(forms.ModelForm):
         model = Factura
         fields = ['imagen_factura']  # Asegúrate de que el modelo Factura tiene este campo
 
-
-
 #---------------------------------------------------------------------------
-
 from django import forms
 from .models import TipoPago
 
@@ -120,3 +117,19 @@ class TipoPagoForm(forms.ModelForm):
         model = TipoPago
         fields = ['tipo_pago', 'alias', 'cbu', 'tipo_logo']
 
+
+#---------------------------------------------------------------------------
+# apps/CarritoApp/forms.py
+from django import forms
+from .models import MensajeCliente
+
+class MensajeClienteForm(forms.ModelForm):
+    class Meta:
+        model = MensajeCliente
+        fields = ["apellido", "nombre", "pedido", "email_contacto"]
+        widgets = {
+            "apellido": forms.TextInput(attrs={"class": "form-control", "required": True}),
+            "nombre": forms.TextInput(attrs={"class": "form-control", "required": True}),
+            "pedido": forms.TextInput(attrs={"class": "form-control", "maxlength": "255", "required": True}),
+            "email_contacto": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Opcional"}),
+        }
